@@ -56,15 +56,92 @@ Each is standalone and dry-run-first. See [tools/README.md](tools/README.md).
 
 ## The method itself
 
-The guide is what was learned; these are **how it was learned** — the two
+The guide is what was learned; this is **how it was learned** — the two
 registers that kept mistakes from repeating, plus full transparency about the
-apparatus:
+apparatus. Every entry below links to its full write-up.
 
-| file | what it is |
+### The playbook — 28 lessons with receipts
+
+Each entry in [PLAYBOOK.md](PLAYBOOK.md) records a real incident: what
+happened (with the numbers), the transferable rule, and its scope. Written
+while the mistake stung; cited by number ever since.
+
+| # | lesson |
 |---|---|
-| [PLAYBOOK.md](PLAYBOOK.md) | 28 numbered lessons, each from a real incident: what happened (with the numbers), the transferable rule, and its scope. The format is the point — copy it. |
-| [DECISIONS.md](DECISIONS.md) | The decision register: intentional choices with reasoning, measured costs of the alternatives, and a "revisit if" trigger each — so odd-looking choices don't get "fixed" back into bugs. |
-| [METHOD.md](METHOD.md) | The full stack (Plex, Lidarr, MusicBrainz, mutagen, ffmpeg), data-source etiquette, and the human + AI workflow that produced all of this — including which of the documented mistakes were the AI's. |
+| [L1](PLAYBOOK.md#l1--a-degraded-system-of-records-counts-are-poison-for-destructive-decisions) | A degraded system-of-record's COUNTS are poison for destructive decisions |
+| [L2](PLAYBOOK.md#l2--validate-a-reproduction-against-the-targets-own-output-never-the-corpus-it-lives-in) | Validate a reproduction against the target's OWN output, never the corpus it lives in |
+| [L3](PLAYBOOK.md#l3--windows-enumeration-silently-drops-paths-over-maxpath) | Windows enumeration silently drops paths over MAX_PATH |
+| [L4](PLAYBOOK.md#l4--a-dry-run-that-probes-the-live-filesystem-lies-about-a-not-yet-created-target) | A dry-run that probes the live filesystem lies about a not-yet-created target |
+| [L5](PLAYBOOK.md#l5--correcting-source-data-doesnt-refresh-a-cached-view-never-force-it-with-a-destructive-api) | Correcting source data doesn't refresh a cached view; never force it with a destructive API |
+| [L6](PLAYBOOK.md#l6--deletions-go-through-the-stores-native-recycletrash-not-hard-delete-or-bespoke-quarantine) | Deletions go through the store's NATIVE recycle/trash, not hard-delete or bespoke quarantine |
+| [L7](PLAYBOOK.md#l7--a-guard-must-be-at-least-as-deep-as-the-action-it-authorizes) | A guard must be at least as DEEP as the action it authorizes |
+| [L8](PLAYBOOK.md#l8--a-new-measuring-instrument-gets-a-known-answer-control-positive-and-negative-before-its-output-is-trusted) | A new measuring instrument gets a known-answer control, positive AND negative, before its output is trusted |
+| [L9](PLAYBOOK.md#l9--print-samples-next-to-aggregates-so-they-can-contradict-each-other) | Print samples next to aggregates so they can contradict each other |
+| [L10](PLAYBOOK.md#l10--complete-from-a-sampled-heuristic-is-a-claim-about-the-sample) | "Complete" from a sampled heuristic is a claim about the sample |
+| [L11](PLAYBOOK.md#l11--inventory-what-already-running-systems-expose-before-adding-a-dependency) | Inventory what already-running systems expose before adding a dependency |
+| [L12](PLAYBOOK.md#l12--before-acting-on-a-cause-look-for-the-observation-that-would-disprove-it) | Before acting on a cause, look for the observation that would DISPROVE it |
+| [L13](PLAYBOOK.md#l13--a-cacheindex-built-over-time-will-not-self-correct-when-the-data-is-fixed) | A cache/index built over time will not self-correct when the data is fixed |
+| [L14](PLAYBOOK.md#l14--controls-prove-your-instrument-separates-the-controls--not-that-its-right-elsewhere) | Controls prove your instrument separates the controls — not that it's right elsewhere |
+| [L15](PLAYBOOK.md#l15--a-similarity-score-computed-over-a-sample-is-silent-about-everything-outside-the-sample) | A similarity score computed over a sample is silent about everything outside the sample |
+| [L16](PLAYBOOK.md#l16--size-the-parallel-unit-to-the-work-not-to-the-loop-you-happened-to-write) | Size the parallel unit to the work, not to the loop you happened to write |
+| [L17](PLAYBOOK.md#l17--a-paginated-api-returns-a-page-treating-it-as-the-whole-set-invents-a-crisis) | A paginated API returns a PAGE; treating it as the whole set invents a crisis |
+| [L18](PLAYBOOK.md#l18--diagnostics-must-not-destabilize-the-system-being-diagnosed) | Diagnostics must not destabilize the system being diagnosed |
+| [L19](PLAYBOOK.md#l19--delete-then-recreate-is-not-atomic-a-crash-in-the-gap-leaves-nothing) | Delete-then-recreate is not atomic; a crash in the gap leaves nothing |
+| [L20](PLAYBOOK.md#l20--it-picked-the-wrong-one-is-often-the-system-obeying-a-setting-you-chose) | "It picked the wrong one" is often the system obeying a setting you chose |
+| [L21](PLAYBOOK.md#l21--a-filter-that-runs-before-your-expensive-check-decides-what-the-check-never-sees) | A filter that runs BEFORE your expensive check decides what the check never sees |
+| [L22](PLAYBOOK.md#l22--a-guard-placed-on-the-wrong-branch-can-skip-the-exact-case-it-was-written-for) | A guard placed on the wrong branch can skip the exact case it was written for |
+| [L23](PLAYBOOK.md#l23--shell-heredocs-mangle-backslash-escapes-write-code-with-a-file-tool) | Shell heredocs mangle backslash escapes; write code with a file tool |
+| [L24](PLAYBOOK.md#l24--before-merging-n-things-into-one-predict-the-resulting-count-and-check-it) | Before merging N things into one, predict the resulting count and check it |
+| [L25](PLAYBOOK.md#l25--a-report-that-always-flags-healthy-items-trains-you-to-skim-it) | A report that always flags healthy items trains you to skim it |
+| [L26](PLAYBOOK.md#l26--hunt-failures-by-severity-not-recency-the-tail-of-a-busy-log-is-all-chatter) | Hunt failures by SEVERITY, not recency; the tail of a busy log is all chatter |
+| [L27](PLAYBOOK.md#l27--validate-a-liveness-check-against-something-known-alive-before-acting-on-it-died) | Validate a liveness check against something known-alive before acting on "it died" |
+| [L28](PLAYBOOK.md#l28--diagnose-from-a-fresh-measurement-not-from-the-last-thing-you-wrote) | Diagnose from a fresh measurement, not from the last thing you wrote |
+
+### The decision register
+
+Each entry in [DECISIONS.md](DECISIONS.md) is an intentional choice with its
+reasoning, the measured cost of the alternative, a narrow scope, and a
+**"revisit if"** trigger — so odd-looking choices don't get "fixed" back into
+bugs, and no decision silently hardens into dogma.
+
+| # | decision |
+|---|---|
+| [D1](DECISIONS.md#d1--on-disk-naming-follows-the-file-tags-not-the-managers-metadata-source) | On-disk naming follows the FILE TAGS, not the manager's metadata source |
+| [D2](DECISIONS.md#d2--unknown-album-clutter-is-fixed-by-writing-tags-never-by-deleting) | "Unknown Album" clutter is fixed by WRITING tags, never by deleting |
+| [D3](DECISIONS.md#d3--cleanup-trash-is-reversible-native-recycle-bin-or-a-quarantine-folder) | Cleanup "trash" is reversible: native recycle bin, or a quarantine folder |
+| [D4](DECISIONS.md#d4--same-recording-is-decided-by-sound-not-filename-tags-or-bytes) | "Same recording?" is decided by SOUND, not filename, tags, or bytes |
+| [D5](DECISIONS.md#d5--official-release-data-comes-from-whats-already-running-before-any-new-tool) | Official release data comes from what's ALREADY RUNNING before any new tool |
+| [D6](DECISIONS.md#d6--the-restrictive-metadata-profile-is-the-default-permissive-is-opt-in-per-artist) | The restrictive metadata profile is the DEFAULT; permissive is opt-in per artist |
+| [D7](DECISIONS.md#d7--upgrade-propagation-requires-three-independent-guards-the-fingerprint-alone-is-insufficient) | Upgrade propagation requires three independent guards; the fingerprint alone is insufficient |
+| [D8](DECISIONS.md#d8--release-type-livestudio-is-measured-from-the-audio-not-inferred-from-names) | Release type (live/studio) is MEASURED from the audio, not inferred from names |
+| [D9](DECISIONS.md#d9--the-media-server-groups-by-identity-embedded-in-files-that-identity-is-inherited-from-wherever-a-track-was-ripped) | The media server groups by identity EMBEDDED IN FILES — inherited from wherever a track was ripped |
+| [D10](DECISIONS.md#d10--tags-are-fixed-before-the-scan-that-builds-album-objects) | Tags are fixed BEFORE the scan that builds album objects |
+| [D11](DECISIONS.md#d11--a-distinct-release-shows-the-year-it-came-out-never-its-parents) | A distinct release shows the year IT came out, never its parent's |
+
+### The apparatus — what all of this runs on
+
+Full details, data-source etiquette, and the working method in
+[METHOD.md](METHOD.md). The stack:
+
+| layer | software | role |
+|---|---|---|
+| media server | **Plex** (`tv.plex.agents.music`, Prefer local metadata ON) | renders the library; chapter 1 |
+| collection manager | **Lidarr** | download/upgrade automation; chapter 5 |
+| metadata authority | **MusicBrainz** (`ws/2`, by release ID) | official release shapes |
+| tag I/O | **mutagen** | all tag reads/writes, header-level audio properties |
+| audio analysis | **ffmpeg** | Chromaprint fingerprints (built-in muxer), `volumedetect` measurements |
+
+No paid services, no proprietary APIs.
+
+**Transparency:** this project — the rescue and this repo — was a
+collaboration between the library's owner (goals, disposition rules, every
+judgment call, review of every dry-run plan) and **Claude (Anthropic), running
+in Claude Code** (the tools, the analyses, the bulk work, most of this
+prose). The AI's own mistakes are documented in the playbook rather than
+sanded off — L7, L27 and L28 were all its. Commits carry
+`Co-Authored-By: Claude` accordingly. [METHOD.md](METHOD.md) has the full
+picture, including the per-project rules-file pattern that made the
+collaboration compound instead of repeating itself.
 
 ## Who this is for
 
