@@ -54,6 +54,18 @@ Each is standalone and dry-run-first. See [tools/README.md](tools/README.md).
 | [`library_manifest.py`](tools/library_manifest.py) | "What exactly do I have?" — streaming, resumable, lock-guarded walk of every file's audio properties and tags |
 | [`library_triage.py`](tools/library_triage.py) | "Where is the work?" — stacked-release and completeness triage off the manifest, zero network |
 
+## The method itself
+
+The guide is what was learned; these are **how it was learned** — the two
+registers that kept mistakes from repeating, plus full transparency about the
+apparatus:
+
+| file | what it is |
+|---|---|
+| [PLAYBOOK.md](PLAYBOOK.md) | 28 numbered lessons, each from a real incident: what happened (with the numbers), the transferable rule, and its scope. The format is the point — copy it. |
+| [DECISIONS.md](DECISIONS.md) | The decision register: intentional choices with reasoning, measured costs of the alternatives, and a "revisit if" trigger each — so odd-looking choices don't get "fixed" back into bugs. |
+| [METHOD.md](METHOD.md) | The full stack (Plex, Lidarr, MusicBrainz, mutagen, ffmpeg), data-source etiquette, and the human + AI workflow that produced all of this — including which of the documented mistakes were the AI's. |
+
 ## Who this is for
 
 Anyone with a music library big enough that "just re-rip it" isn't an answer and

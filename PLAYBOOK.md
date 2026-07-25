@@ -1,0 +1,382 @@
+# Playbook — lessons with receipts
+
+How this project avoided repeating its mistakes: every incident that produced a
+**confidently wrong answer** became a numbered entry in this file, written the
+same way each time —
+
+- **What happened** — the concrete failure, with the real numbers;
+- **Lesson** — the general rule it proves, stated so it transfers;
+- **Scope** — where the rule applies, so it can't be over- or under-applied.
+
+Two disciplines make a file like this work. *Write the entry while it stings* —
+a lesson harvested a week later loses the detail that makes it recognizable.
+And *cite entries by number* in code comments, tickets and reviews — an
+uncited playbook is a diary; a cited one is a checklist that grows itself.
+
+Everything below was earned during the rescue of one ~31,000-file library.
+The entries are ordered as they happened, which is also roughly
+cheapest-mistake to most-expensive.
+
+---
+
+### L1 — A degraded system-of-record's COUNTS are poison for destructive decisions
+**What happened:** Asked to delete "albums that show one track", we found 436 of
+them — but the music manager's scan was stalled, having matched one file of
+each album's real tracklist. By the system's OWN declared `totalTrackCount`,
+exactly ONE album was genuinely single-track. Deleting on the observed count
+would have destroyed 436 real albums.
+**Lesson:** When a source-of-truth is mid-failure (stalled scan, partial
+import, rate-limited sync), its aggregate counts are artifacts of the failure,
+not facts about the world — and they are most dangerous as the trigger for a
+DELETE. Separate "what the system asserts this item IS" (declared track total)
+from "what its broken process happened to observe so far" (files matched). Act
+on the former; treat a surprising count from a degraded source as evidence
+your *view* is broken, and surface it instead of executing.
+**Scope:** any destructive batch gated on a queryable system's metrics
+
+### L2 — Validate a reproduction against the target's OWN output, never the corpus it lives in
+**What happened:** A renderer was built to name files "as the music manager
+would" without running it. Graded against the whole library it scored 66% —
+meaningless, because the manager had named only ~810 of ~30,000 files; the
+rest carried other tools' conventions from years past. Graded against the
+manager's own managed files, the format matched exactly; the residual gap
+(preferring MusicBrainz metadata over file tags) was inherent and got
+documented, not "fixed".
+**Lesson:** When you reimplement another tool's behavior, the only valid
+ground truth is output that tool actually produced. The ambient corpus is full
+of other tools' history and will score a faithful reproduction as broken.
+Isolate the target's own artifacts, validate there, and record inherent gaps
+as known limitations.
+**Scope:** any reimplementation / port / renderer graded for fidelity
+
+### L3 — Windows enumeration silently drops paths over MAX_PATH
+**What happened:** A dry-run AND its apply both reported "no failures" while
+silently omitting 8 tracks whose nested scene-release folders pushed paths past
+260 characters — `os.walk`/`rglob` don't raise on an over-long path, they skip
+it. The gap surfaced only because a reconcile compared files-in against
+files-accounted-for.
+**Lesson:** Any Windows sweep that must be exhaustive has to enumerate via the
+extended-length `\\?\` form, and pair it with a reconcile that fails LOUDLY
+when input count ≠ disposed-of count. "The plan looked complete" is exactly how
+silent omission disguises itself.
+**Scope:** any Windows file-tree sweep that must be complete
+
+### L4 — A dry-run that probes the live filesystem lies about a not-yet-created target
+**What happened:** A folder-merge dry-run tested `dest.exists()` on disk — but
+when merging several folders into a BRAND-NEW target, nothing exists mid-plan,
+so every colliding file read as a clean move: 22 "moves" that were really 11
+moves + 11 collisions. The apply path was correct; the preview lied.
+**Lesson:** A dry-run is trustworthy only if it simulates the same state
+transitions apply performs. Model the operation against an in-memory picture of
+claimed slots, updated identically with or without `--apply`, so the preview's
+numbers EQUAL the real run's. A dry-run you can't trust is worse than none: it
+launders a bad plan as reviewed.
+**Scope:** any move / merge / dedupe planner with a dry-run
+
+### L5 — Correcting source data doesn't refresh a cached view; never force it with a destructive API
+**What happened:** Fixing misgrouped tracks meant writing their missing
+`album_artist` tags — the true fix. The media server re-read the files (titles
+updated) but kept them bonded to the stale album object; full scan, metadata
+refresh, empty-trash, clean-bundles all changed nothing. The lever that works
+is "unmatch" (drop the cached match, re-derive from tags). The lever that must
+never be used is the server's DELETE endpoint — it removes the actual files.
+**Lesson:** Many systems hold a derived, cached view that does not rebuild just
+because you corrected the source and the system re-read it. Making the cache
+reflect the fix is a SEPARATE step with its own non-destructive mechanism
+(re-index, unmatch, rebuild). Never reach for a delete/remove action to force a
+cosmetic refresh.
+**Scope:** any store with a cached/derived grouping over editable source data
+
+### L6 — Deletions go through the store's NATIVE recycle/trash, not hard-delete or bespoke quarantine
+**What happened:** Cleanup scripts had been inventing ad-hoc quarantine folders
+per job while the NAS already exposed a recycle bin per share with its own
+retention and auto-purge. Standing rule since: deletions route through the
+native bin, mirroring the origin subpath.
+**Lesson:** When the store already has a native trash with a retention window,
+route deletions THROUGH it — you inherit recoverability, one consistent
+location, and automatic cleanup for free, and a same-volume move is instant.
+Reserve hard delete for what provably never mattered, and say so.
+**Scope:** any deletion from a store that has a native trash / recycle
+
+### L7 — A guard must be at least as DEEP as the action it authorizes
+**What happened:** A mover split stacked album folders, then retired each
+emptied source. It tested emptiness with `os.listdir` — ONE level — and deleted
+with a recursive walk — ALL levels. Two folders held disc subfolders; the
+shallow test said "empty", and the deep delete took 56 files (a box set and two
+vinyl rips), unrecoverable. The same run had explicitly deferred those folders
+as multi-disc hazards — then deleted them in cleanup.
+**Lesson:** When a cheap predicate authorizes an irreversible action, the
+predicate's scope must cover everything the action can touch. A one-level check
+before a recursive delete, a HEAD before a full sync — same bug, and it fails
+silently because the guard honestly reports on the narrow thing it looked at.
+Write the check against the action's blast radius. And pair it with L6: a
+deletion path with no recoverable step converts every guard bug into permanent
+loss.
+**Scope:** any guarded destructive operation, especially recursive ones
+
+### L8 — A new measuring instrument gets a known-answer control, positive AND negative, before its output is trusted
+**What happened:** Five instruments returned plausible, well-formed, WRONG
+answers in one session. ffprobe omits `bits_per_raw_sample` for many FLACs → 0
+→ 28 files "upgrades" over themselves. Ranking lossless by bitrate → 39 phantom
+upgrades. A fake-hi-res test highpassed at 24 kHz on 44.1 kHz files — above
+Nyquist — and reported everything "suspect". A browse API resolved missing
+directories to their nearest existing parent, so wrong paths returned plausible
+listings. A field read `None` for every record because the real field was named
+differently. None of these threw an error. The one instrument right on first
+use — the fingerprinter — was the one validated against a known-same and a
+known-different pair before use.
+**Lesson:** An instrument that returns a number is not an instrument that
+returns the RIGHT number, and at the call site they look identical. Before a
+measurement drives a decision, run it against a case whose answer you know —
+and one whose answer you know is the opposite (a positive control alone passes
+for anything that returns a constant). Treat "field is missing/None/0" as a
+third outcome, never as a low value.
+**Scope:** any probe, API field, scoring function, or heuristic whose output authorizes an action
+
+### L9 — Print samples next to aggregates so they can contradict each other
+**What happened:** A scan reported "21 upgrades" while the three example rows
+printed beneath showed the staged file LOSING. That one-screen contradiction
+exposed the bit-depth bug. It recurred twice more — each time the aggregate
+looked authoritative and the samples refuted it.
+**Lesson:** An aggregate is a claim; a sample is evidence. Emit both from the
+SAME data structure so a reader can check one against the other at a glance.
+When they disagree, believe the samples — they carry raw values, while the
+count has already passed through the logic under suspicion.
+**Scope:** any script reporting counts over a collection
+
+### L10 — "Complete" from a sampled heuristic is a claim about the sample
+**What happened:** A staging folder was declared reconciled on the strength of
+an album-level, one-file-per-album sampling pass. Asked directly whether it was
+really done, the honest answer was no: a per-track pass over all 4,326 files
+found 29 genuine upgrades in MIXED albums the sampling could not see.
+**Lesson:** Coverage is part of a result, not a footnote. State the basis in
+the same breath as the finding — "sampled one file per album" vs "every file".
+When the cost gap forces sampling, make the exhaustive pass feasible instead of
+skipping it (here, a size pre-filter turned ~3 hours of probing into minutes —
+a real upgrade is always much larger on disk).
+**Scope:** any audit, sweep, or migration reporting completeness
+
+### L11 — Inventory what already-running systems expose before adding a dependency
+**What happened:** "Is this extra track official bonus content?" needs release
+data; the obvious answer was installing a library manager for its MusicBrainz
+plugin. One query against the ALREADY-RUNNING manager showed it knew 17
+releases of the album, including the exact 26-track edition that settled the
+case.
+**Lesson:** Services already in the stack expose far more than the feature they
+were installed for. Before adding a tool for data, spend one query asking
+whether something already running has it — this also avoids a second source of
+truth that can drift from the first. When the existing service genuinely can't
+answer, that limitation is the recorded justification for the dependency.
+**Scope:** any "we should install X to get Y" decision
+
+### L12 — Before acting on a cause, look for the observation that would DISPROVE it
+**What happened:** A folder showed as four albums; inspection found genuinely
+messy date tags — a real defect and a plausible cause. 78 files were retagged
+and a 600-second full rescan run. Nothing changed. The refutation had been
+sitting in the FIRST listing taken: all four album objects already displayed
+the SAME year, so dates could not be what split them. The real cause was stale
+accumulated objects (L13); one merge call fixed it instantly.
+**Lesson:** "I found a defect near the symptom" is not "I found the cause."
+Before an expensive write, ask the cheap question: *what would I see if this
+theory were false — and do I already have that observation?* Corollary: when a
+fix runs clean and the symptom is unchanged, that is the theory being
+falsified — stop and re-diagnose, don't escalate. Fix the unrelated defect
+anyway; just don't bill it as the cure.
+**Scope:** any causal claim that authorizes a write, especially against a live system
+
+### L13 — A cache/index built over time will not self-correct when the data is fixed
+**What happened:** A media server had, across many past scans, created several
+album objects for what is now one clean folder. Correcting the files and
+re-scanning did nothing — the scanner reconciles files against EXISTING
+objects; it does not re-derive grouping. Only an explicit merge collapsed them.
+**Lesson:** Derived stores record decisions made when each row was created.
+Fixing the source changes what NEW rows would look like; it does not revisit
+old ones. Look for the operation that rebuilds or merges the entity itself, and
+prefer the reversible one (a merge that can be split beats delete-and-rescan).
+Verify by re-reading the store afterwards.
+**Scope:** any derived index, cache, or library database downstream of files you just fixed
+
+### L14 — Controls prove your instrument separates the controls — not that it's right elsewhere
+**What happened:** A live-album detector was calibrated exactly as L8 asks —
+known-studio and known-live albums confirmed on opposite sides of the
+threshold. It then flagged a famous *studio* album as live, because its
+measurement ("tracks end loud") is genuinely true of that album's arrangements.
+The controls were never sensitive to the confound.
+**Lesson:** Passing controls proves the instrument is not inert; it does not
+prove it measures the thing you care about. After calibrating, run it over
+cases whose answers you know independently and read the *verdicts*, not the
+summary count. When a false positive appears, prefer a measurement with a
+different confound (applause is continuous → a live track is loud at the START
+too, while studio tracks begin from silence) over nudging the threshold, which
+only moves the error around.
+**Scope:** any classifier, heuristic, or detector you calibrate before trusting
+
+### L15 — A similarity score computed over a sample is silent about everything outside the sample
+**What happened:** The fingerprinter compares the first ~120 seconds. Two files
+scored a perfect **1.000** — at 244s and 236s: different edits sharing an
+identical opening. A radio edit vs the album version scored 0.936. Twenty-one
+such pairs had cleared the confidence bar and were queued to overwrite each
+other.
+**Lesson:** A sampled comparison's score is evidence about the sampled region
+only. Check a cheap whole-object invariant alongside it — length, record
+count, byte size. Here duration cost one probe field, was decisive, and should
+have been the FIRST guard, not the last one added.
+**Scope:** fingerprints, embeddings, head/tail diffs, any "similar enough" threshold
+
+### L16 — Size the parallel unit to the work, not to the loop you happened to write
+**What happened:** A measurement pass over 104 album folders ran a fresh
+16-worker pool *inside each album*. Most albums hold ~13 tracks, so the pool
+was never full and its setup was paid 104 times. Flattening to one pool over
+all 1,399 files fixed it without changing the worker count.
+**Lesson:** "Am I using workers?" is the wrong question — ask what the pool is
+spread across. A pool nested in a loop is throttled by the smallest iteration.
+Collect the full work-list first, then parallelize once. Report throughput
+against the believed bottleneck so "8.5 calls/sec over SMB" can be recognized
+as saturated rather than starved.
+**Scope:** any fan-out over a nested collection
+
+### L17 — A paginated API returns a PAGE; treating it as the whole set invents a crisis
+**What happened:** An audit walked a parent→children endpoint and reported "104
+folders on disk but only 60 albums; 214 tracks missing across 45 folders." All
+false. The endpoint paginates at 60; querying the item type directly returned
+all 104 albums and every track. An hour went into diagnosing data that was
+never absent.
+**Lesson:** Any list endpoint may be a page. Before reporting a shortfall,
+prove the reader is complete: check the total field, re-query with an explicit
+page size, cross-check the count a second way. The tell is a suspiciously
+round ceiling (60, 100, 1000) — treat "N equals the default page size" as a
+reader bug until proven otherwise.
+**Scope:** REST collections, SDK list calls, DB cursors, any parent→children walk
+
+### L18 — Diagnostics must not destabilize the system being diagnosed
+**What happened:** A watcher polled a media server every 15 seconds, each time
+pulling the ENTIRE track list with a 20,000-item page size — during a full
+library scan. The server crashed. Twice, because the first crash was written
+off as coincidence.
+**Lesson:** Monitoring competes with the work it monitors. Poll the cheapest
+signal that answers the question (a status flag, a count) and pull the payload
+once the flag says done. Scale the interval to the operation's real duration.
+When the system falls over right after you start hammering it, you are the
+prime suspect; a second identical crash is confirmation, not bad luck.
+**Scope:** any polling/monitoring against a system under load
+
+### L19 — Delete-then-recreate is not atomic; a crash in the gap leaves nothing
+**What happened:** Rebuilding a library meant deleting it and immediately
+re-creating it. The server crashed between the calls. The delete had
+committed; the create had not; the library did not exist — and the user
+noticed first.
+**Lesson:** A destroy/rebuild pair is a window where the resource is absent.
+Verify the recreate succeeded; prefer create-then-swap where the API allows.
+Where it doesn't, confirm the underlying DATA survives the delete (here: audio
+files counted either side, 1408 → 1408) and re-check existence at the end
+instead of trusting the last status code.
+**Scope:** library/index rebuilds, drop-and-recreate migrations, blue/green swaps
+
+### L20 — "It picked the wrong one" is often the system obeying a setting you chose
+**What happened:** The server showed an obviously wrong album cover while two
+correct ones sat unused in its picker. Not a ranking bug: the library was set
+to *prefer local metadata*, and the tracks carried embedded art inherited from
+the album they were ripped from. The server was obeying instructions.
+**Lesson:** When a configured system makes a choice that looks stupid, first
+ask which of your settings makes that choice CORRECT. Preference settings reach
+far beyond the field you were thinking about when you set them. The fix lives
+at the level the setting actually reads (a folder-level cover file that
+outranks embedded art), not in fighting the symptom.
+**Scope:** any "prefer X" / precedence setting
+
+### L21 — A filter that runs BEFORE your expensive check decides what the check never sees
+**What happened:** Tracks were bucketed by normalized title before
+fingerprinting (the all-pairs comparison is quadratic). `dance extended mix`
+and `extended dance mix` bucketed apart, so the duplicate pair was never
+compared at all — while hours went into tuning a similarity threshold it never
+reached.
+**Lesson:** The cheap pre-filter, not the expensive comparison, sets the
+ceiling on what can be found. When something that should match doesn't, first
+check whether the candidates ever MET. Loosening a pre-filter is usually safe
+precisely because the real checks still run downstream — measure the cost
+instead of assuming it explodes.
+**Scope:** blocking/bucketing before fuzzy match, candidate generation before ranking, any prefilter→scorer pipeline
+
+### L22 — A guard placed on the wrong branch can skip the exact case it was written for
+**What happened:** A near-miss rescue pass (for pairs scoring just under the
+same-recording bar) was nested inside the branch handling singleton clusters.
+The file it was written for always clustered WITH its low-quality copy, so the
+rescue never ran on it — while demoing fine on 28 other pairs.
+**Lesson:** Placing a check inside an existing conditional inherits that
+conditional's assumptions. Ask what the guard conceptually ranges over ("every
+pair") and put it at that level. Then test it against the specific input that
+motivated it — plausible aggregate output is not evidence the new path
+executed for that case.
+**Scope:** rescue/fallback passes, retry logic, special-cases added into existing control flow
+
+### L23 — Shell heredocs mangle backslash escapes; write code with a file tool
+**What happened:** A function written into a Python file via shell heredoc had
+its regex `\b` become a literal backspace byte (0x08). The regex matched
+nothing, and the failure looked like a logic error — the code READ correctly
+in every excerpt, because control bytes don't render.
+**Lesson:** Any escape sequence written through a shell heredoc is suspect;
+use a real file-write tool for source. When output contradicts code that looks
+right, stop re-reading and print what the interpreter actually loaded (`repr`,
+hex dump).
+**Scope:** generating source via shell, config files with regexes/paths
+
+### L24 — Before merging N things into one, predict the resulting count and check it
+**What happened:** Duplicate album objects needed merging, and merging the
+wrong pair silently fuses two different records — the damage is invisible
+because the result looks plausible either way. The free check: each pair's
+track counts had to sum to the folder's file count (4+5=9, 9+1=10, 7+1=8,
+11+1=12, 13+1=14). All five predicted, all five landed.
+**Lesson:** A consolidation is a claim about arithmetic — *these parts are the
+whole*. State the expected post-merge number BEFORE the call and assert it
+after; if the parts don't sum, they were never the same thing and the merge is
+hiding data. Any operation that reduces N records to 1 should have a
+conservation law you can write down and test.
+**Scope:** dedupe/merge passes, record consolidation, "collapse duplicates" tooling
+
+### L25 — A report that always flags healthy items trains you to skim it
+**What happened:** A triage compared artist names to folder names and flagged
+three artists *every run* — all three were correct-by-construction (illegal
+path characters force `AC/DC` → `AC+DC`; a trailing dot is dropped). The
+summary line stopped carrying information.
+**Lesson:** Known-benign findings are worse than none: they teach you the alert
+list is noise, so the run where it says 4 gets the same glance as the run where
+it says 3. Encode the benign transformation as an expectation so the check
+still runs but only speaks when reality departs from the rules. "I know about
+those three" does not survive into next month or someone else's head.
+**Scope:** linters, audit/triage reports, monitoring alerts, CI warnings
+
+### L26 — Hunt failures by SEVERITY, not recency; the tail of a busy log is all chatter
+**What happened:** To check whether a known failure was recurring, the last 40
+log records were read — all `info`, so the failure was declared absent and the
+diagnosis went to an innocent subsystem. Querying the same log at error level
+returned 200 records of exactly that failure, continuous for hours.
+**Lesson:** "Recent logs look clean" is only evidence if the sample could have
+contained the failure. Filter by severity (or grep the signature) over a real
+time window before declaring an all-clear — and state the filter you used when
+a conclusion rests on a log sample.
+**Scope:** any "is it still happening?" check against logs
+
+### L27 — Validate a liveness check against something known-alive before acting on "it died"
+**What happened:** A detached scan was polled with `ps w`, which lists only
+processes with a controlling terminal — so it reported the scan dead while it
+ran perfectly. Acting on the false verdict launched a second copy against the
+same output file: 1,265 duplicate records.
+**Lesson:** A liveness probe is code that can be wrong, and its failure mode —
+"everything is dead" — invites destructive reactions. Point the probe at a
+process you KNOW is running first. Prefer `ps -ef`/`pgrep`, and give the tool
+an O_EXCL pidfile lock so a lying probe *cannot* create a second writer.
+**Scope:** daemon/watchdog scripts, restart-on-dead automation
+
+### L28 — Diagnose from a fresh measurement, not from the last thing you wrote
+**What happened:** One root cause was diagnosed three times. First call:
+correct. Then a bad log sample (L26) said the evidence was absent, so a
+confident written "correction" shipped blaming another subsystem. Only when the
+system was down and directly measurable did the correction collapse — the
+original call had been right all along. Each re-diagnosis had anchored on the
+previous written conclusion instead of new primary evidence.
+**Lesson:** When you revise a root cause, re-derive it from evidence measured
+NOW — your own prior write-up reads as authority even where it was a guess.
+Name the specific measurement that forces the new diagnosis; if you can't, you
+are pattern-matching your own prose. A correction deserves MORE evidence than
+the original claim, not less.
+**Scope:** any multi-round diagnosis, incident write-ups, RCA
