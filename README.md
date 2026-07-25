@@ -32,10 +32,17 @@ guessed.
    names, release dates in tags — all are claims. The guide is explicit about
    which checks *verify* and which merely *fail to find evidence*.
 
+## Start here
+
+**[Workflow — where to start for your setup](docs/00-workflow.md)** routes you by
+what you run (files only / + Plex / + Lidarr / the full stack) and gives the
+ordered steps for each. Read it first; it points into the chapters below.
+
 ## The guide
 
 | chapter | what it covers |
 |---|---|
+| [0 — Workflow](docs/00-workflow.md) | The front door: pick your setup, get the ordered steps, disk → Lidarr → tags → Plex |
 | [1 — How Plex groups music](docs/01-how-plex-groups-music.md) | The four embedded identity signals, why fixing tags doesn't fix built albums, the merge/unmatch/rebuild repair ladder, API traps |
 | [2 — Diagnosing a messy artist](docs/02-diagnosing-a-messy-artist.md) | The layer model, the merge-vs-split decision table, stacked folders, box sets that only look broken |
 | [3 — Duplicates and quality](docs/03-duplicates-and-quality.md) | The quality ladder and how it's miscomputed, fake hi-res/lossless detection, fingerprinting thresholds, the three guards |
