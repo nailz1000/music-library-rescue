@@ -157,3 +157,36 @@ pressing date.
 
 **Revisit if:** never as stated — but expect the unmatch+refresh step on
 every reissue split out of a parent folder.
+
+### D12 — CD and vinyl (any two distinct MASTERS) of one album are kept as SEPARATE releases, distinguished in the name
+Where D11 is about editions/years, this is about two different SOURCES of the
+same album — a CD (or CD remaster) and a vinyl rip. They are distinct releases,
+not duplicates: keep both on disk in separate release folders. A library manager
+that models one file per track can only track ONE, so it tracks the
+higher-resolution copy; the other stays as an untracked release. Mark the source
+in BOTH the album-title tag and the folder name (`… [CD]` / `… [24-192 Vinyl]`):
+the server separates them by their differing date, but otherwise renders both as
+the same "title / year" tile — indistinguishable to a human. Determination is
+MEASURED, not read off the name (playbook L32): a "vinyl" tag on 16/44.1 audio
+is a mislabeled CD copy and gets deduped by quality, not kept as a second
+release.
+
+**Gotcha:** the server won't re-read an album's title tag on rescan unless the
+folder PATH changed — rename the folder, or force a per-album metadata refresh.
+
+**Revisit if:** the manager ever tracks multiple releases of one album
+natively — then track both, not only the better one.
+
+### D13 — Hi-res / lossless-container rips are down-converted to a 96 kHz / 24-bit ceiling, and that counts as "lossless"
+Rips arrive at absurd rates (384 kHz / 32-bit vinyl transfers are real). For a
+vinyl or analog-sourced rip the band above ~48 kHz and the bits below 24 are
+noise and empty ultrasonic spectrum — vinyl holds ~12-14 bits and nothing above
+~30 kHz — so a 96/24 FLAC keeps 100% of the actual audio at a fraction of the
+size (a measured 384/32 album: 6.4 GB → 1.2 GB). Rule: keep native rate if
+≤ 96 kHz else resample to 96; keep 16-bit sources at 16 else 24; never inflate.
+Treat the result as lossless even though it is not bit-identical, because the
+discarded data carries no music. (Probe the source with a tool that parses the
+format — L32.)
+
+**Revisit if:** a genuinely > 24-bit MUSICAL source appears (studio masters, not
+vinyl) — the ceiling deserves reconsideration for that source.

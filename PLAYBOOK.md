@@ -380,3 +380,66 @@ Name the specific measurement that forces the new diagnosis; if you can't, you
 are pattern-matching your own prose. A correction deserves MORE evidence than
 the original claim, not less.
 **Scope:** any multi-round diagnosis, incident write-ups, RCA
+
+### L29 — A compilation shatters into one album PER performer when album_artist is the TRACK artist
+**What happened:** A 14-track hits compilation credited to one headline artist
+carried, on three tracks, the `album_artist` of the track's ACTUAL performer
+(two by a sibling band, one by a guest). The server groups albums by
+`album_artist`, so ONE folder rendered as THREE identical "same title / same
+year" albums under three artists — the smallest fragment (a single guest track)
+read as a mystery album by an artist with nothing else in the library.
+**Lesson:** On a compilation the `album_artist` must be the album's CREDITED
+artist — uniform across every track (or `Various Artists` for a true VA comp) —
+while the per-track `artist` still carries the real performer for the credit.
+This is the wrong-VALUE cousin of the empty-`album_artist` bug (L5 / decision
+D2): there the tag was blank, here it is set to the track artist. Fixing the tag
+is not enough — the server won't re-group existing objects (L13); rebuild
+(unmatch, or move-out → empty-trash → move-back).
+**Scope:** any multi-performer album (hits comp, soundtrack, tribute, split) on a server grouping by album_artist
+
+### L30 — Splitting a cue-image rip has two silent-no-op traps
+**What happened:** Converting one-file-per-side vinyl images to per-track files
+via a `.cue`, two bugs each made the splitter find "nothing" while looking like
+it succeeded. (1) The rip folder was a scene name in brackets — `[001+114] …` —
+and the code listed cues with `glob`, where `[…]` is a CHARACTER CLASS, not a
+literal, so it matched no directory. (2) The cue's `FILE` lines named files with
+a junk prefix (`{xxxx} Artist … .flac`) absent on disk, so every source read as
+missing.
+**Lesson:** List a known folder's contents with `os.listdir` + a suffix filter,
+never `glob` with the directory path embedded (a scene `[..]` folder IS a glob
+pattern). Resolve each cue `FILE` against disk defensively: exact → strip a
+leading `{..}`/`[..]` token → map the cue's FILE refs to the folder's audio
+files in order when the counts match. And prove the split lossless the only way
+that counts — decode the concatenated output to PCM and compare its MD5 to the
+original side, not "it looked right".
+**Scope:** cue-sheet / single-file-image splitting; any glob over release folders
+
+### L31 — Before importing a rip, check the library already holds it — equal or better
+**What happened:** A freshly-converted 17-track vinyl rip was queued to import
+as a new album. The library ALREADY had that album — same 96 kHz/24-bit quality,
+and MORE complete (a bonus track the new rip lacked). Importing would have made
+a duplicate, or overwritten an equal-or-better copy with a worse one. The real
+defect was elsewhere: the existing copy showed as partly-matched only because
+the manager had ORPHANED 5 of its on-disk tracks — a re-link, not an import.
+**Lesson:** "Import this download" is a create; do the read first. Compare the
+candidate to the destination's existing copy by the disposition rules
+(add-missing / replace-if-better / discard-if-equal-or-worse / never-lose-a-
+track) BEFORE writing. A partly-matched existing album is usually an orphaned-
+link problem (re-link the on-disk files), not a gap to fill with a second copy.
+**Scope:** importing any downloaded release into a library that may already hold it
+
+### L32 — A format/quality claim — in a tag, a release name, or an encoder's silence — is not the audio
+**What happened:** Three claims lied in one session. A file tagged `media: 12"
+Vinyl` was 16-bit/44.1 kHz and an incomplete subset — CD-spec audio wearing a
+vinyl label. A metadata library reported sample-rate and bit-depth of ZERO for a
+32-bit/384 kHz file it couldn't parse (a different tool read it fine). An encoder
+that caps at 24-bit silently TRUNCATED a 32-bit source and produced a valid file
+whose decoded PCM no longer matched the input.
+**Lesson:** Decide source and quality from the AUDIO, measured — not from a name
+or tag (L8, extended to provenance claims). Probe with a tool that actually
+parses the format; a library's `0`/`None` is "couldn't read", a third outcome
+(L8), never a real value — cross-check a suspicious zero against a second tool.
+After any transform that could hit a capability boundary (bit depth, sample
+rate, channels), verify the output preserved what you claim (decoded-PCM MD5, or
+a format probe of the result) rather than trusting the command "worked".
+**Scope:** provenance/quality decisions, format probes, lossless transforms
