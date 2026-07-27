@@ -67,7 +67,7 @@ The guide is what was learned; this is **how it was learned** — the two
 registers that kept mistakes from repeating, plus full transparency about the
 apparatus. Every entry below links to its full write-up.
 
-### The playbook — 28 lessons with receipts
+### The playbook — 32 lessons with receipts
 
 Each entry in [PLAYBOOK.md](PLAYBOOK.md) records a real incident: what
 happened (with the numbers), the transferable rule, and its scope. Written
@@ -103,6 +103,10 @@ while the mistake stung; cited by number ever since.
 | [L26](PLAYBOOK.md#l26--hunt-failures-by-severity-not-recency-the-tail-of-a-busy-log-is-all-chatter) | Hunt failures by SEVERITY, not recency; the tail of a busy log is all chatter |
 | [L27](PLAYBOOK.md#l27--validate-a-liveness-check-against-something-known-alive-before-acting-on-it-died) | Validate a liveness check against something known-alive before acting on "it died" |
 | [L28](PLAYBOOK.md#l28--diagnose-from-a-fresh-measurement-not-from-the-last-thing-you-wrote) | Diagnose from a fresh measurement, not from the last thing you wrote |
+| [L29](PLAYBOOK.md#l29--a-compilation-shatters-into-one-album-per-performer-when-album_artist-is-the-track-artist) | A compilation shatters into one album PER performer when album_artist is the TRACK artist |
+| [L30](PLAYBOOK.md#l30--splitting-a-cue-image-rip-has-two-silent-no-op-traps) | Splitting a cue-image rip has two silent-no-op traps |
+| [L31](PLAYBOOK.md#l31--before-importing-a-rip-check-the-library-already-holds-it--equal-or-better) | Before importing a rip, check the library already holds it — equal or better |
+| [L32](PLAYBOOK.md#l32--a-formatquality-claim--in-a-tag-a-release-name-or-an-encoders-silence--is-not-the-audio) | A format/quality claim — in a tag, a release name, or an encoder's silence — is not the audio |
 
 ### The decision register
 
@@ -124,6 +128,8 @@ bugs, and no decision silently hardens into dogma.
 | [D9](DECISIONS.md#d9--the-media-server-groups-by-identity-embedded-in-files-that-identity-is-inherited-from-wherever-a-track-was-ripped) | The media server groups by identity EMBEDDED IN FILES — inherited from wherever a track was ripped |
 | [D10](DECISIONS.md#d10--tags-are-fixed-before-the-scan-that-builds-album-objects) | Tags are fixed BEFORE the scan that builds album objects |
 | [D11](DECISIONS.md#d11--a-distinct-release-shows-the-year-it-came-out-never-its-parents) | A distinct release shows the year IT came out, never its parent's |
+| [D12](DECISIONS.md#d12--cd-and-vinyl-any-two-distinct-masters-of-one-album-are-kept-as-separate-releases-distinguished-in-the-name) | CD and vinyl (any two distinct MASTERS) of one album are kept as SEPARATE releases, distinguished in the name |
+| [D13](DECISIONS.md#d13--hi-res--lossless-container-rips-are-down-converted-to-a-96-khz--24-bit-ceiling-and-that-counts-as-lossless) | Hi-res / lossless-container rips are down-converted to a 96 kHz / 24-bit ceiling, and that counts as "lossless" |
 
 ### The apparatus — what all of this runs on
 
