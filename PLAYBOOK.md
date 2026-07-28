@@ -443,3 +443,21 @@ After any transform that could hit a capability boundary (bit depth, sample
 rate, channels), verify the output preserved what you claim (decoded-PCM MD5, or
 a format probe of the result) rather than trusting the command "worked".
 **Scope:** provenance/quality decisions, format probes, lossless transforms
+
+### L33 — A media-server album count that looks half-right is a VIEW artifact; count TRACKS vs files before re-scanning
+**What happened:** After rebuilding an artist's grouping, the media server's
+artist page showed **45 album objects for 94 disk folders**. A long, wasteful
+chase followed — folder move-out/move-back, forced re-scans, touching every
+mtime, reading scanner logs — before the definitive check: **996 of 1008 tracks
+were present, in 92 distinct parent albums.** The server buckets releases by type
+(Albums / Singles / EPs / Live / Compilations), and the default album view counts
+only the "album" type — so ~47 singles and EPs were invisible and a COMPLETE
+rebuild read as half-failed.
+**Lesson:** Album-object count is a grouped, type-FILTERED view; track count is
+the data. When an album count looks wrong — especially ~half the folder count —
+verify with the cheap ground truth FIRST: the distinct-parent count over the
+artist's TRACKS, against the files on disk. If they match, nothing is missing and
+no re-scan will help — the gap is category grouping. Re-scanning off an unverified
+album shortfall burns time and changes nothing. And prefer the smallest fix —
+merge the few duplicate objects — over a full-artist rebuild.
+**Scope:** any media-library audit where "album objects" ≠ folders; verifying a "missing releases" claim
