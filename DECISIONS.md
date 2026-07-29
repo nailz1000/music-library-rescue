@@ -19,7 +19,7 @@ The format, which is most of the value:
 These are the decisions from the source rescue, generalized. Adopt the ones
 that fit; the register format is the part meant to be copied.
 
-**Scoping discipline (playbook P78/P81; see claude-tools/DECISIONS.md D4):**
+**Scoping discipline (playbook P78/P81):**
 Scope each entry NARROWLY — the ONE thing decided and its tradeoff, not a vague "we simplified X" —
 so it can't be stretched to dismiss an adjacent request (P81). A decision is NOT a shield; don't cite one
 to reject a request unless the request is literally what the entry decided against. When an entry keeps
