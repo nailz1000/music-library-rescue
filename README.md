@@ -67,7 +67,7 @@ The guide is what was learned; this is **how it was learned** — the two
 registers that kept mistakes from repeating, plus full transparency about the
 apparatus. Every entry below links to its full write-up.
 
-### The playbook — 32 lessons with receipts
+### The playbook — 39 lessons with receipts
 
 Each entry in [PLAYBOOK.md](PLAYBOOK.md) records a real incident: what
 happened (with the numbers), the transferable rule, and its scope. Written
@@ -115,7 +115,7 @@ while the mistake stung; cited by number ever since.
 | [L38](PLAYBOOK.md#l38--one-artist-can-exist-twice-split-by-a-diacritic) | One artist can exist TWICE, split by a diacritic |
 | [L39](PLAYBOOK.md#l39--a-wrong-diagnosis-that-ends-in-deletion-is-worse-than-a-crash) | A wrong diagnosis that ends in DELETION is worse than a crash |
 
-### The decision register
+### The decision register — 14 decisions
 
 Each entry in [DECISIONS.md](DECISIONS.md) is an intentional choice with its
 reasoning, the measured cost of the alternative, a narrow scope, and a
