@@ -19,6 +19,15 @@ The format, which is most of the value:
 These are the decisions from the source rescue, generalized. Adopt the ones
 that fit; the register format is the part meant to be copied.
 
+**Scoping discipline (playbook P78/P81; see claude-tools/DECISIONS.md D4):**
+Scope each entry NARROWLY — the ONE thing decided and its tradeoff, not a vague "we simplified X" —
+so it can't be stretched to dismiss an adjacent request (P81). A decision is NOT a shield; don't cite one
+to reject a request unless the request is literally what the entry decided against. When an entry keeps
+getting invoked in things that aren't working out, it's OVER-BROAD — re-scope it (P78), never overrule
+the owner's judgment. **Revisiting what a decision covers = tightening it in the same change (P78):**
+when you revisit what a decision entry describes, or act outside it, update the entry in the same sitting
+— add the nuance you learned, cite the concrete case, sharpen the "Revisit if" trigger.
+
 ---
 
 ### D1 — On-disk naming follows the FILE TAGS, not the manager's metadata source
@@ -223,3 +232,4 @@ re-fetched complete and imported cleanly on the next run.
 
 **Revisit if:** the janitor is ever extended to act on corruption verdicts,
 where a fresh copy is the actual remedy.
+
