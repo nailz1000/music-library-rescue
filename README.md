@@ -107,6 +107,13 @@ while the mistake stung; cited by number ever since.
 | [L30](PLAYBOOK.md#l30--splitting-a-cue-image-rip-has-two-silent-no-op-traps) | Splitting a cue-image rip has two silent-no-op traps |
 | [L31](PLAYBOOK.md#l31--before-importing-a-rip-check-the-library-already-holds-it--equal-or-better) | Before importing a rip, check the library already holds it — equal or better |
 | [L32](PLAYBOOK.md#l32--a-formatquality-claim--in-a-tag-a-release-name-or-an-encoders-silence--is-not-the-audio) | A format/quality claim — in a tag, a release name, or an encoder's silence — is not the audio |
+| [L33](PLAYBOOK.md#l33--a-media-server-album-count-that-looks-half-right-is-a-view-artifact-count-tracks-vs-files-before-re-scanning) | A media-server album count that looks half-right is a VIEW artifact; count TRACKS vs files before re-scanning |
+| [L34](PLAYBOOK.md#l34--a-blocklist-that-also-triggers-a-re-search-is-a-closed-loop-when-the-rejection-is-a-matching-verdict) | A blocklist that also triggers a re-search is a closed loop when the rejection is a MATCHING verdict |
+| [L35](PLAYBOOK.md#l35--has-a-cue-is-not-needs-splitting) | "Has a cue" is not "needs splitting" |
+| [L36](PLAYBOOK.md#l36--a-rip-can-ship-several-cues-take-the-one-whose-file-refs-exist-on-disk) | A rip can ship SEVERAL cues; take the one whose FILE refs exist on disk |
+| [L37](PLAYBOOK.md#l37--a-per-track-guest-credit-in-album-artist-mints-a-phantom-artist) | A per-track GUEST credit in album-artist mints a phantom artist |
+| [L38](PLAYBOOK.md#l38--one-artist-can-exist-twice-split-by-a-diacritic) | One artist can exist TWICE, split by a diacritic |
+| [L39](PLAYBOOK.md#l39--a-wrong-diagnosis-that-ends-in-deletion-is-worse-than-a-crash) | A wrong diagnosis that ends in DELETION is worse than a crash |
 
 ### The decision register
 
@@ -130,6 +137,7 @@ bugs, and no decision silently hardens into dogma.
 | [D11](DECISIONS.md#d11--a-distinct-release-shows-the-year-it-came-out-never-its-parents) | A distinct release shows the year IT came out, never its parent's |
 | [D12](DECISIONS.md#d12--cd-and-vinyl-any-two-distinct-masters-of-one-album-are-kept-as-separate-releases-distinguished-in-the-name) | CD and vinyl (any two distinct MASTERS) of one album are kept as SEPARATE releases, distinguished in the name |
 | [D13](DECISIONS.md#d13--hi-res--lossless-container-rips-are-down-converted-to-a-96-khz--24-bit-ceiling-and-that-counts-as-lossless) | Hi-res / lossless-container rips are down-converted to a 96 kHz / 24-bit ceiling, and that counts as "lossless" |
+| [D14](DECISIONS.md#d14--an-automated-blocklist-never-triggers-a-re-search) | An automated blocklist NEVER triggers a re-search |
 
 ### The apparatus — what all of this runs on
 

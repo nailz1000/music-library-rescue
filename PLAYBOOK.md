@@ -461,3 +461,112 @@ no re-scan will help — the gap is category grouping. Re-scanning off an unveri
 album shortfall burns time and changes nothing. And prefer the smallest fix —
 merge the few duplicate objects — over a full-artist rebuild.
 **Scope:** any media-library audit where "album objects" ≠ folders; verifying a "missing releases" claim
+
+### L34 — A blocklist that also triggers a re-search is a closed loop when the rejection is a MATCHING verdict
+**What happened:** A nightly janitor cleared stuck imports with "blocklist and
+remove", leaving the manager's re-download flag at its default — which means
+"blocklist this, then go find another copy right now". Every reason it acted on
+was a MATCHING verdict: *has fewer tracks than existing release*, *album match is
+not close enough: 75.8 % vs 80 %*, *worst track match: 55.0 % vs 60 %*. None
+describe a corrupt file; they describe how the release lines up against the
+metadata release the manager chose. A different copy of the same album earns the
+same verdict. Caught in the act inside ONE 20-minute run: the same release
+blocklisted at 10:00:21 and again at 10:00:51. Over days the download folder
+reached **663 GB / 593 folders, 185 of them `.1` duplicates**, and the constant
+re-downloads kept the downloader busy — which deferred the cleanup pass that was
+supposed to empty it. The mechanism filling the folder was starving the one
+draining it.
+**Lesson:** Separate "this release is BAD" from "this release does not MATCH".
+Only the first justifies fetching another copy, and it never arrives on the
+failed-import path anyway — a genuine download failure surfaces as its own
+event. Any automated blocklist should skip the re-search. Note also that
+blocklists match on release TITLE, so the same release re-published with
+different punctuation walks straight back in: `Artist.Name-Album-CDS-FLAC` was
+blocklisted and `Artist Name-Album-CDS-FLAC` was queued twelve minutes later.
+**Scope:** any library manager with automated queue cleanup
+
+### L35 — "Has a cue" is not "needs splitting"
+**What happened:** A sweep selected every folder holding a `.cue`, audio, and no
+split output — 204 candidates. **141 were ordinary per-track rips** that simply
+ship a cue alongside one file per track. The difference is visible at a glance:
+
+    image rip      4 files, 378-624 MB, named "Side A.flac"
+    per-track rip  9 files,  24- 29 MB, named "07. Track Title.flac"
+
+Sixty-nine percent of the planned work was pointless, and that was most of the
+runtime problem it was blamed on.
+**Lesson:** A rip needs cutting exactly when one `FILE` holds more than one
+`TRACK` — **and** the cue must describe MORE tracks than there are audio files
+present. The second half is not optional: a per-track rip can carry a LEFTOVER
+single-image cue describing audio that is no longer there (14 per-track files
+beside a cue with one FILE ref and 14 TRACKs), which cue-internally is
+indistinguishable from a genuine image rip.
+**Scope:** any bulk cue-splitting sweep
+
+### L36 — A rip can ship SEVERAL cues; take the one whose FILE refs exist on disk
+**What happened:** A two-disc rip carried four cues — a `.wav`-era pair and a
+`.flac` pair, one of each per disc. The splitter selected "the cue with the most
+FILE refs"; all four had exactly one, so the tie resolved to directory order and
+it picked a `.wav` cue naming a file that never existed. The run died with
+`MISSING source file(s) referenced by cue`, which reads exactly like an
+incomplete download — and the folder was put on a delete-and-blocklist list on
+that basis. Both disc images (439 MB + 444 MB) were present and perfect. Pointed
+at the `.flac` cues it split **bit-perfect**, 14 tracks recovered.
+**Lesson:** Rank candidate cues by how many of their `FILE` references actually
+RESOLVE on disk, then by count, then by name so the choice is deterministic
+rather than dependent on listing order. A tie-break that can select an
+unresolvable cue will eventually condemn a perfect rip.
+**Scope:** cue selection wherever more than one cue can exist in a folder
+
+### L37 — A per-track GUEST credit in album-artist mints a phantom artist
+**What happened:** A famous album's one duet track carried the GUEST as its
+album-artist (and no separate album-artist tag at all — only `artist`). The
+importer filed that single track under her name, and the server then rendered
+the whole album under her. The same shape produced **seven** phantom artists
+from one electronic album ("X & Collaborator A", "X & Collaborator B", …) and
+five from a DJ compilation — 26 in a single pass, each an artist page holding
+one or two orphaned songs.
+**Lesson:** The fix is NOT to stop trusting album-artist — that tag is what
+routes a MISLABELLED folder correctly (a folder named for one album containing
+another lands right *because* the tags are believed over the folder name). The
+evidence is in the FOLDER: 29 of 30 tracks say one thing and one disagrees. Take
+the source folder's MODAL album-artist when the outlier claims the SAME album,
+on either signal — the mode is a PREFIX of the outlier under a credit separator
+(`&`, `feat.`, `+`), or the mode covers ≥80 % of the folder's tagged tracks (which
+catches a guest credited without naming the lead). A true various-artists
+compilation has no dominant value and passes through untouched. Careful: a name
+that merely STARTS with the dominant one is a DIFFERENT act: a band called
+`Kissing The Pink` on a folder dominated by `Kiss` is not a Kiss track, and a
+prefix test without the separator check will claim it.
+**Scope:** importing any release with featured artists or duets
+
+### L38 — One artist can exist TWICE, split by a diacritic
+**What happened:** The library held one artist under two folders — the same
+name with and without its diaeresis. The manager tracked only the accented
+spelling, so 43 tracks were invisible to it, and the server rendered two
+artists. A sweep found **four** such pairs across ~350 artists, and one of them
+split on a straight apostrophe versus an acute accent (`'` vs `´`) rather than
+an accented letter at all.
+**Lesson:** Normalise names by FOLDING diacritics (NFKD, then drop only the
+combining marks), never by stripping non-alphanumerics — stripping turns a
+name containing `ë` into `nme` rather than `name`, a different key entirely, so
+an artist stops matching its own credit variants. Merge to the spelling the
+manager points at. Leave albums that exist by the same name on BOTH sides in
+place for a human: folding two
+same-titled album folders together is a release-identity decision, not a rename.
+**Scope:** any name matching across a library — dedupe, credit resolution, merges
+
+### L39 — A wrong diagnosis that ends in DELETION is worse than a crash
+**What happened:** In one pass, four folders were queued for
+delete-and-blocklist as "incomplete downloads". **All four held good audio.** A
+complete 11-track album carrying a cue for a different edition; two complete
+per-track rips sitting beside a leftover image cue; and a folder dismissed as
+"78 GB of junk poster scans" that was a 59-album discography of roughly 950
+tracks.
+**Lesson:** Before any delete driven by a tool's OWN error text, verify the
+CLAIM independently — count the files, read the cue, compare the size sets
+against the copy you already hold. The error tells you what the tool could not
+do; it never tells you what is on disk. A crash announces itself. A confident
+misreading removes data and leaves nothing looking broken afterwards, which is
+why this one deserves a hard rule rather than care.
+**Scope:** any automated cleanup with a delete or blocklist branch

@@ -198,3 +198,28 @@ format — L32.)
 
 **Revisit if:** a genuinely > 24-bit MUSICAL source appears (studio masters, not
 vinyl) — the ceiling deserves reconsideration for that source.
+
+### D14 — An automated blocklist NEVER triggers a re-search
+**Decided** after measuring the loop it caused.
+
+A janitor that clears stuck imports acts on ONE class of failure: the manager
+declined to match a download to a release. Every reason it sees is a matching
+verdict — fewer tracks than the chosen release, album similarity under
+threshold, worst-track-title score under threshold. A different copy of the same
+album produces the same verdict, so "blocklist and immediately search for a
+replacement" is a closed loop by construction (L34).
+
+**The rule.** Automated blocklists set the manager's skip-redownload flag. The
+album stays monitored, so a scheduled search or a human can still find a
+genuinely better release — but nothing is fetched on the strength of a matching
+failure.
+
+**The one exception**, which must be identified positively rather than by
+default: a download that is genuinely INCOMPLETE — the cue references files that
+were never fetched, or the track numbering has a hole. That is a real defect in
+the copy, another copy plausibly fixes it, and a re-grab is correct. Verified in
+practice: an album deleted and blocklisted for a truncated second disc was
+re-fetched complete and imported cleanly on the next run.
+
+**Revisit if:** the janitor is ever extended to act on corruption verdicts,
+where a fresh copy is the actual remedy.
