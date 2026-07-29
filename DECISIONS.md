@@ -30,7 +30,7 @@ when you revisit what a decision entry describes, or act outside it, update the 
 
 ---
 
-### D1 — On-disk naming follows the FILE TAGS, not the manager's metadata source
+### D1 — On-disk naming follows the FILE TAGS, not the manager's metadata source (2026-07-24)
 When the library manager's scan was wedged, files still had to be named and
 filed. The manager names from MusicBrainz (original-release year, MB casing) —
 which an offline tool cannot reproduce, because that data isn't in the files.
@@ -45,7 +45,7 @@ format already matches, so files won't move; some years/casings change).
 
 See sibling entry: Plex DECISIONS.md D1
 
-### D2 — "Unknown Album" clutter is fixed by WRITING tags, never by deleting
+### D2 — "Unknown Album" clutter is fixed by WRITING tags, never by deleting (2026-07-24)
 Tracks land in a media server's "Various Artists / [Unknown Album]" bucket
 because their `album_artist` tag is EMPTY — not because they are junk. They
 are real, catalogued music with stripped tags. A literal "delete the one-track
@@ -58,7 +58,7 @@ still never a blanket delete of everything that merely looks one-track.
 
 See sibling entry: Plex DECISIONS.md D2
 
-### D3 — Cleanup "trash" is reversible: native recycle bin, or a quarantine folder
+### D3 — Cleanup "trash" is reversible: native recycle bin, or a quarantine folder (2026-07-24)
 Disposition rules (uncatalogued → trash, duplicate → keep higher quality,
 verified demo → `Demo/`, live bootleg → `Live Bootleg/`) decide WHAT goes;
 reversibility decides HOW. "Trash" always means a move to the store's native
@@ -70,7 +70,7 @@ provably-worthless set — the reversible default is a safety net, not a mandate
 
 See sibling entry: Plex DECISIONS.md D3
 
-### D4 — "Same recording?" is decided by SOUND, not filename, tags, or bytes
+### D4 — "Same recording?" is decided by SOUND, not filename, tags, or bytes (2026-07-24)
 Settled by Chromaprint fingerprinting over a sliding alignment offset
 (`tools/fingerprint.py`). Measured thresholds: ≥ 0.85 same recording,
 0.65–0.85 related edit (human decides), < 0.65 different. Everything cheaper
@@ -86,7 +86,7 @@ arbiter for edits vs duplicates.
 
 See sibling entry: Plex DECISIONS.md D4
 
-### D5 — Official release data comes from what's ALREADY RUNNING before any new tool
+### D5 — Official release data comes from what's ALREADY RUNNING before any new tool (2026-07-24)
 Deciding whether an extra track is legitimate bonus content needs release
 data. The already-running manager's API had 17 releases of the album in
 question, including the exact edition that settled it (playbook L11). No new
@@ -97,7 +97,7 @@ gap, not a wholesale replacement.
 
 **Revisit if:** the gaps become the common case rather than the exception.
 
-### D6 — The restrictive metadata profile is the DEFAULT; permissive is opt-in per artist
+### D6 — The restrictive metadata profile is the DEFAULT; permissive is opt-in per artist (2026-07-24)
 A restrictive profile (Album+Studio only) means the manager never creates
 compilation/soundtrack/single/live/remix albums — files belonging to them can
 never match, *by design*. The permissive alternative was measured: four
@@ -112,7 +112,7 @@ is per-album disk-vs-release-tracklist comparison.
 
 **Revisit if:** per-artist opt-in becomes the common case.
 
-### D7 — Upgrade propagation requires three independent guards; the fingerprint alone is insufficient
+### D7 — Upgrade propagation requires three independent guards; the fingerprint alone is insufficient (2026-07-24)
 Rule: every copy of a recording is raised to the best quality owned;
 different *versions* (remaster, remix, edit, live) are never touched. The
 fingerprint samples ~120s, so a radio edit scores 1.000 against the album
@@ -128,7 +128,7 @@ song with its karaoke version. Mastering markers compare as SETS (`mono` vs
 **Revisit if:** never wholesale — but individual markers earn or lose hazard
 status by evidence, as `deluxe` did.
 
-### D8 — Release type (live/studio) is MEASURED from the audio, not inferred from names
+### D8 — Release type (live/studio) is MEASURED from the audio, not inferred from names (2026-07-24)
 Names are wrong in both directions: real concert recordings match no keyword,
 while a "Tour Souvenir Single" is studio. Metadata doesn't rescue it — the
 albums marked Live in MusicBrainz are rarely the unmatched folders at risk.
@@ -142,7 +142,7 @@ judgments no measurement can make (soundboard recordings) live.
 **Revisit if:** an artist's live material is soundboard-sourced with the crowd
 mixed out — no audio measurement saves that; it needs a human flag.
 
-### D9 — The media server groups by identity EMBEDDED IN FILES; that identity is inherited from wherever a track was ripped
+### D9 — The media server groups by identity EMBEDDED IN FILES; that identity is inherited from wherever a track was ripped (2026-07-24)
 The four signals (release MBID, whole-string date, originaldate/year, embedded
 art) and their failure modes are chapter 1 of the [guide](docs/01-how-plex-groups-music.md).
 Registered as a decision because it drives a rule: **fix tags to describe the
@@ -152,7 +152,7 @@ though the claim is historically true.
 
 **Revisit if:** the server changes what its prefer-local setting governs.
 
-### D10 — Tags are fixed BEFORE the scan that builds album objects
+### D10 — Tags are fixed BEFORE the scan that builds album objects (2026-07-24)
 Correcting tags never fixes albums the server already built (playbook L13) —
 demonstrated: a forced deep rescan fixed none of five known defects; a library
 rebuild fixed three instantly. So on any new library: set prefer-local FIRST,
@@ -161,7 +161,7 @@ needs a rebuild, not a refresh.
 
 **Revisit if:** the server's scanner ever re-derives grouping on rescan.
 
-### D11 — A distinct release shows the year IT came out, never its parent's
+### D11 — A distinct release shows the year IT came out, never its parent's (2026-07-24)
 An anniversary edition with a different tracklist (25 tracks vs the original's
 11) is a *different album* and displays its own year. The deciding field is
 `originalyear` (which drives displayed year), not `date` — the edition had
@@ -175,7 +175,7 @@ pressing date.
 **Revisit if:** never as stated — but expect the unmatch+refresh step on
 every reissue split out of a parent folder.
 
-### D12 — CD and vinyl (any two distinct MASTERS) of one album are kept as SEPARATE releases, distinguished in the name
+### D12 — CD and vinyl (any two distinct MASTERS) of one album are kept as SEPARATE releases, distinguished in the name (2026-07-26)
 Where D11 is about editions/years, this is about two different SOURCES of the
 same album — a CD (or CD remaster) and a vinyl rip. They are distinct releases,
 not duplicates: keep both on disk in separate release folders. A library manager
@@ -194,7 +194,7 @@ folder PATH changed — rename the folder, or force a per-album metadata refresh
 **Revisit if:** the manager ever tracks multiple releases of one album
 natively — then track both, not only the better one.
 
-### D13 — Hi-res / lossless-container rips are down-converted to a 96 kHz / 24-bit ceiling, and that counts as "lossless"
+### D13 — Hi-res / lossless-container rips are down-converted to a 96 kHz / 24-bit ceiling, and that counts as "lossless" (2026-07-26)
 Rips arrive at absurd rates (384 kHz / 32-bit vinyl transfers are real). For a
 vinyl or analog-sourced rip the band above ~48 kHz and the bits below 24 are
 noise and empty ultrasonic spectrum — vinyl holds ~12-14 bits and nothing above
@@ -208,7 +208,7 @@ format — L32.)
 **Revisit if:** a genuinely > 24-bit MUSICAL source appears (studio masters, not
 vinyl) — the ceiling deserves reconsideration for that source.
 
-### D14 — An automated blocklist NEVER triggers a re-search
+### D14 — An automated blocklist NEVER triggers a re-search (2026-07-29)
 **Decided** after measuring the loop it caused.
 
 A janitor that clears stuck imports acts on ONE class of failure: the manager
