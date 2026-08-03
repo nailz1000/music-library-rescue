@@ -19,12 +19,12 @@ The format, which is most of the value:
 These are the decisions from the source rescue, generalized. Adopt the ones
 that fit; the register format is the part meant to be copied.
 
-**Scoping discipline (playbook P78/P81):**
+**Scoping discipline:**
 Scope each entry NARROWLY — the ONE thing decided and its tradeoff, not a vague "we simplified X" —
-so it can't be stretched to dismiss an adjacent request (P81). A decision is NOT a shield; don't cite one
+so it can't be stretched to dismiss an adjacent request. A decision is NOT a shield; don't cite one
 to reject a request unless the request is literally what the entry decided against. When an entry keeps
-getting invoked in things that aren't working out, it's OVER-BROAD — re-scope it (P78), never overrule
-the owner's judgment. **Revisiting what a decision covers = tightening it in the same change (P78):**
+getting invoked in things that aren't working out, it's OVER-BROAD — re-scope it, never overrule
+the owner's judgment. **Revisiting what a decision covers = tightening it in the same change:**
 when you revisit what a decision entry describes, or act outside it, update the entry in the same sitting
 — add the nuance you learned, cite the concrete case, sharpen the "Revisit if" trigger.
 
@@ -62,7 +62,7 @@ See sibling entry: Plex DECISIONS.md D2
 Disposition rules (uncatalogued → trash, duplicate → keep higher quality,
 verified demo → `Demo/`, live bootleg → `Live Bootleg/`) decide WHAT goes;
 reversibility decides HOW. "Trash" always means a move to the store's native
-recycle bin (PLAYBOOK.md P120), never an immediate hard delete — bulk judgment
+recycle bin ([playbook L6](PLAYBOOK.md)), never an immediate hard delete — bulk judgment
 calls about obscure tracks are exactly the decisions that get revisited.
 
 **Revisit if:** the owner asks for immediate hard deletion of a specific,
