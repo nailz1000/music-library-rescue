@@ -225,3 +225,37 @@ re-fetched complete and imported cleanly on the next run.
 **Revisit if:** the janitor is ever extended to act on corruption verdicts,
 where a fresh copy is the actual remedy.
 
+
+### D15 — This register stands ALONE; it never points at a repo the reader can't open (2026-08-03)
+This repo is public. The work it generalizes happened in a private one, and the
+tempting shorthand is a cross-reference: a "see the sibling entry" link, a bare
+numbered citation into the other repo's playbook, an absolute local path to
+where a script really lives. Every one of those reads as a real citation and
+resolves to nothing for the person actually holding this document.
+
+It happened twice. A correct local citation was once *replaced* with a
+cross-repo one during a cleanup pass, and four entries here carried pointer
+links into the private register. Both were found by eye, weeks apart, by
+someone who happened to know the other repo existed — which is not a control.
+
+**The rule.** An entry is written so a stranger can act on it with nothing but
+this repo. Derived content gets RESTATED here, not linked. Cite only what ships
+alongside it — this repo's own playbook (`L<n>`), its `docs/`, its `tools/`.
+Where provenance genuinely matters, say it in self-contained words
+("generalized from the source rescue"), never as a pointer. The private side
+may link *here*, because that direction resolves; the return link is
+deliberately absent and should not be "fixed" in.
+
+**Enforced, not just intended:** a pre-commit gate blocks staged lines carrying
+a cross-repo pointer shape — a private repo name, a numbered citation into a
+playbook that isn't this one, an absolute local path. Product names are
+untouched (this guide names Plex and Lidarr constantly); it is the POINTER
+shape that is blocked, so the gate stays quiet until something regresses.
+
+*The gate rejected the first draft of this very entry, which quoted those
+shapes literally as examples. Rewritten to describe them instead — the entry
+reads better for a stranger without the internal strings, and the gate keeps
+no bypass.*
+
+**Revisit if:** the private counterpart is ever published — the constraint is
+the reader's access, not the split itself.
