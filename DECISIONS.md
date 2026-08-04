@@ -43,8 +43,6 @@ named, so tag-naming is the consistent choice.
 MusicBrainz naming — then a manager-driven rename pass supersedes this (the
 format already matches, so files won't move; some years/casings change).
 
-See sibling entry: Plex DECISIONS.md D1
-
 ### D2 — "Unknown Album" clutter is fixed by WRITING tags, never by deleting (2026-07-24)
 Tracks land in a media server's "Various Artists / [Unknown Album]" bucket
 because their `album_artist` tag is EMPTY — not because they are junk. They
@@ -56,8 +54,6 @@ server refiles them. Only items verified uncatalogued get trashed.
 **Revisit if:** an entry is *verified* junk — then it's a recycle-bin move,
 still never a blanket delete of everything that merely looks one-track.
 
-See sibling entry: Plex DECISIONS.md D2
-
 ### D3 — Cleanup "trash" is reversible: native recycle bin, or a quarantine folder (2026-07-24)
 Disposition rules (uncatalogued → trash, duplicate → keep higher quality,
 verified demo → `Demo/`, live bootleg → `Live Bootleg/`) decide WHAT goes;
@@ -67,8 +63,6 @@ calls about obscure tracks are exactly the decisions that get revisited.
 
 **Revisit if:** the owner asks for immediate hard deletion of a specific,
 provably-worthless set — the reversible default is a safety net, not a mandate.
-
-See sibling entry: Plex DECISIONS.md D3
 
 ### D4 — "Same recording?" is decided by SOUND, not filename, tags, or bytes (2026-07-24)
 Settled by Chromaprint fingerprinting over a sliding alignment offset
@@ -83,8 +77,6 @@ optional: 0.75 index-aligned vs 0.93 with the search, on a known-same pair.
 **Revisit if:** the library is ever normalized to one tagger + one encoding,
 making cheap checks sufficient for most pairs — fingerprinting stays the
 arbiter for edits vs duplicates.
-
-See sibling entry: Plex DECISIONS.md D4
 
 ### D5 — Official release data comes from what's ALREADY RUNNING before any new tool (2026-07-24)
 Deciding whether an extra track is legitimate bonus content needs release
