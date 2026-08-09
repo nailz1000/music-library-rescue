@@ -259,3 +259,32 @@ no bypass.*
 
 **Revisit if:** the private counterpart is ever published — the constraint is
 the reader's access, not the split itself.
+
+### D16 — A credited SINGLE is filed under its lead artist when that artist exists; anything larger is an owner decision (2026-08-08)
+
+Collaboration singles — "Lead feat. Guest", "Lead vs. Other", "Lead + Other" —
+live under the LEAD artist's folder as their own release. What decides is
+commercial reality on disk, not the manager's matching: the owner's words were
+"we can put them into whatever album is commercially viable for them — it
+doesn't need to be a manager match if it exists on disc." The per-track
+`artist` tag keeps the full credit, because the credit is true; only the
+album-artist and the folder change.
+
+The guard that makes this safe to automate (L43): the lead must ALREADY exist
+as an artist folder. Five real bands in this library carry `&` or `+` in their
+names, and all five fail that test and are untouched.
+
+Above a single's size (~6 tracks) the tool refuses and asks, because the same
+shape stops being a misfiling and becomes a judgement call. Each of these was
+decided by the owner, one at a time, and each went a different way:
+
+* a 16-track co-credited duets compilation → filed under the primary artist;
+* a former band name holding two early albums → merged into the current name,
+  filling an "empty" album the loss report had counted as vanished (L45);
+* a 10-track co-credited orchestral release → merged into the band's own album
+  of the same name;
+* one single whose lead artist is not in the library at all → recycled rather
+  than filed, because creating an artist for one track is a worse outcome.
+
+**Revisit if:** singles start arriving for leads deliberately not collected —
+that would argue for creating the lead artist folder rather than requiring it.

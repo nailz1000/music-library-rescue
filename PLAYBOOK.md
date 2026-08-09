@@ -570,3 +570,111 @@ do; it never tells you what is on disk. A crash announces itself. A confident
 misreading removes data and leaves nothing looking broken afterwards, which is
 why this one deserves a hard rule rather than care.
 **Scope:** any automated cleanup with a delete or blocklist branch
+
+### L40 — A delete guard that tests CHARACTERS blocks the work; test the HAZARD
+**What happened:** A cleanup's delete guard refused any path containing `*`,
+`?`, `[` or `]` — written after a real incident where an unexpanded glob
+reached `rm`. But scene release names carry literal brackets as standard
+(`[24BIT]`, `[WEBFLAC]`, part-number prefixes): **20 of 80 download folders —
+one in four — were permanently undeletable**, a floor under every cleanup run.
+Caught live when a rip that FAILED bit-perfect verification stayed on disk
+because its folder name contained a bracketed catalog number. The same guard's
+traversal check (`".." in path`) was a SUBSTRING test, so any album title with
+an ellipsis — `Whatever Happened To... ?` — read as path traversal and became
+undeletable too. Both found by one regression suite written for the fix.
+**Lesson:** An unexpanded glob names no directory; a real bracketed folder
+does. Require the exact quoted path to resolve to an existing directory,
+refuse the literal glob shape (a `*` tail), and check traversal per path
+SEGMENT, never by substring. And "existence unknown" is not permission — a
+probe that fails must refuse, not proceed.
+**Scope:** any automated delete driven by parsed or constructed paths
+
+### L41 — A network-mount listing under concurrent writes lies — including "empty"
+**What happened:** While an import was writing heavily into the library share,
+enumerating ONE album folder over the mount returned 43, 13, 13, 47, then **0**
+files within about ten seconds; the file server itself answered 43 every time.
+Three identical runs of a per-track comparison tool gave three contradictory,
+confident answers, each built on a different random subset — and the wrong
+suspects (broken matching, flaky tag reads, concurrent mutation) were all
+plausible and all disproved first. Only reading both transports side by side
+in the same seconds isolated the transport. A zero-length listing is
+indistinguishable from an empty folder, and "empty" is exactly the signal
+cleanup tools use to DELETE.
+**Lesson:** For any decision that deletes, moves, or compares, take the file
+list from the filesystem's own host over SSH — or at minimum enumerate twice
+and refuse to act when the reads disagree. Make the helper's API distinguish
+"could not ask" from "nothing there" (None versus empty list): collapsing the
+two is the difference between a visible refusal and a silent loss. The trigger
+is concurrent heavy WRITES to the mount being enumerated, so the fault is
+bursty — a tool that ran clean ten minutes later proves nothing about the run
+that mattered.
+**Scope:** bulk reads over any network mount; worst during import/move phases
+
+### L42 — A fix made only on DISK is undone by the next import
+**What happened:** Twice in one day. A duplicate album folder — measured
+byte-identical to its twin — was deliberately retired to the recycle area; a
+manual search eleven days later recreated it, old disc-folder structure and
+all, because the manager still tracked the retired name. Same day, an artist
+folder that had been merged into its accented twin that MORNING was recreated
+by the nightly import: the importer derives its destination from tags and knew
+nothing about the merge.
+**Lesson:** The library's layout is DOWNSTREAM of whatever writes it. A
+correction that only touches folders buys hours; the durable fix lands in the
+writer — the importer's resolution rules, the manager's tracked paths, and the
+tags inside the moved files themselves. Corollary: after any move, retag what
+moved. A relocated file still SAYS its old name, and anything that reads tags
+will faithfully rebuild the mess from them.
+**Scope:** any library whose importer or manager derives structure from tags
+
+### L43 — A whole-folder credit defeats modal evidence; file under the credit's LEAD, only if that artist EXISTS
+**What happened:** The modal album-artist rule (L37) works when 29 of 30
+tracks agree and one disagrees. A SINGLE credited "Lead feat. Guest" has every
+track carrying the same credit — the mode IS the credit, nothing disagrees —
+and one nightly import minted **18 phantom artist folders** that way while the
+real artist already existed with over a thousand tracks. The cleanup then had
+its own trap: one remix single existed ONLY under two different credit
+variants, and the tool nearly "fixed" it by moving one phantom into the other.
+**Lesson:** When a folder is unanimous, strip the credit and file under the
+LEAD — the part before the FIRST separator, never a name found anywhere in the
+string, so "Headliner feat. A, B & C" resolves to Headliner and not to a guest
+— and accept it only when that lead already exists as an artist folder. An
+existing artist is evidence; a parsed string alone is a guess. A separator in
+a name is NOT evidence: this library holds five real bands with `&` or `+` in
+their names (300+ tracks), and every one must fail the lead test untouched.
+And an owner must be a PLAIN artist — with no plain owner, report; moving a
+phantom into a phantom just concentrates the mess somewhere harder to find.
+**Scope:** credit resolution wherever "Artist feat. Guest" reaches album-artist
+
+### L44 — A tool's size threshold is load-bearing; raising it turns cleanup into demolition
+**What happened:** A phantom cleanup documented for "one- and two-track
+phantoms, not a library reorganiser" was run with its threshold raised from 2
+to 12 to catch bigger strays. It proposed **53 recycles**, and among them were
+REAL albums under the REAL artist that are merely small — a 5-track mix
+release, 2-track live volumes, a 3-track compilation disc. At the designed
+threshold the same run proposed 3 moves and 0 recycles.
+**Lesson:** The threshold encodes the tool's evidence model. At 2 tracks,
+"another artist holds this same album in full" is strong evidence of a stray;
+at 12, small legitimate releases are indistinguishable from phantoms and the
+same logic condemns them. Read a docstring's scope claim as a safety property,
+not a tunable default — and when a raised threshold suddenly proposes an order
+of magnitude more destruction, that is the tool announcing it has left its
+design envelope, not finding more work.
+**Scope:** any batch tool guarded by a size or count limit
+
+### L45 — A "vanished" album may be an empty SHELL; search former names before concluding loss
+**What happened:** A manifest diff listed five albums as gone entirely — no
+trace in the library or any holding area. Re-checked days later: three existed
+again as EMPTY folders, recreated by the manager around fresh imports. And
+one, examined only because a former-band-name folder was being merged, had all
+8 tracks sitting under the band's OLD name the whole time — the "vanished"
+folder was an empty shell left behind by a half-finished move. The genuinely
+missing count fell from five to at most two before anything was restored. A
+near-miss title pair (the same album singular and plural, one letter apart)
+had prevented the folders from ever merging by name.
+**Lesson:** "The folder is empty" and "the music is gone" drift apart — under
+managers that recreate tracked folders, and under moves that copied the audio
+out but left the shell. Before treating a diff's REMOVED as a loss: check the
+artist's former names, check near-miss spellings of the title, and check
+whether an empty folder's twin under another name holds the audio. An empty
+shell is evidence of a MOVE at least as often as of a deletion.
+**Scope:** interpreting any manifest or diff loss report

@@ -67,7 +67,7 @@ The guide is what was learned; this is **how it was learned** — the two
 registers that kept mistakes from repeating, plus full transparency about the
 apparatus. Every entry below links to its full write-up.
 
-### The playbook — 39 lessons with receipts
+### The playbook — 45 lessons with receipts
 
 Each entry in [PLAYBOOK.md](PLAYBOOK.md) records a real incident: what
 happened (with the numbers), the transferable rule, and its scope. Written
@@ -114,8 +114,14 @@ while the mistake stung; cited by number ever since.
 | [L37](PLAYBOOK.md#l37--a-per-track-guest-credit-in-album-artist-mints-a-phantom-artist) | A per-track GUEST credit in album-artist mints a phantom artist |
 | [L38](PLAYBOOK.md#l38--one-artist-can-exist-twice-split-by-a-diacritic) | One artist can exist TWICE, split by a diacritic |
 | [L39](PLAYBOOK.md#l39--a-wrong-diagnosis-that-ends-in-deletion-is-worse-than-a-crash) | A wrong diagnosis that ends in DELETION is worse than a crash |
+| [L40](PLAYBOOK.md#l40--a-delete-guard-that-tests-characters-blocks-the-work-test-the-hazard) | A delete guard that tests CHARACTERS blocks the work; test the HAZARD |
+| [L41](PLAYBOOK.md#l41--a-network-mount-listing-under-concurrent-writes-lies--including-empty) | A network-mount listing under concurrent writes lies — including "empty" |
+| [L42](PLAYBOOK.md#l42--a-fix-made-only-on-disk-is-undone-by-the-next-import) | A fix made only on DISK is undone by the next import |
+| [L43](PLAYBOOK.md#l43--a-whole-folder-credit-defeats-modal-evidence-file-under-the-credits-lead-only-if-that-artist-exists) | A whole-folder credit defeats modal evidence; file under the credit's LEAD, only if that artist EXISTS |
+| [L44](PLAYBOOK.md#l44--a-tools-size-threshold-is-load-bearing-raising-it-turns-cleanup-into-demolition) | A tool's size threshold is load-bearing; raising it turns cleanup into demolition |
+| [L45](PLAYBOOK.md#l45--a-vanished-album-may-be-an-empty-shell-search-former-names-before-concluding-loss) | A "vanished" album may be an empty SHELL; search former names before concluding loss |
 
-### The decision register — 14 decisions
+### The decision register — 16 decisions
 
 Each entry in [DECISIONS.md](DECISIONS.md) is an intentional choice with its
 reasoning, the measured cost of the alternative, a narrow scope, and a
@@ -138,6 +144,8 @@ bugs, and no decision silently hardens into dogma.
 | [D12](DECISIONS.md#d12--cd-and-vinyl-any-two-distinct-masters-of-one-album-are-kept-as-separate-releases-distinguished-in-the-name) | CD and vinyl (any two distinct MASTERS) of one album are kept as SEPARATE releases, distinguished in the name |
 | [D13](DECISIONS.md#d13--hi-res--lossless-container-rips-are-down-converted-to-a-96-khz--24-bit-ceiling-and-that-counts-as-lossless) | Hi-res / lossless-container rips are down-converted to a 96 kHz / 24-bit ceiling, and that counts as "lossless" |
 | [D14](DECISIONS.md#d14--an-automated-blocklist-never-triggers-a-re-search) | An automated blocklist NEVER triggers a re-search |
+| [D15](DECISIONS.md#d15--this-register-stands-alone-it-never-points-at-a-repo-the-reader-cant-open-2026-08-03) | This register stands ALONE; it never points at a repo the reader can't open |
+| [D16](DECISIONS.md#d16--a-credited-single-is-filed-under-its-lead-artist-when-that-artist-exists-anything-larger-is-an-owner-decision-2026-08-08) | A credited SINGLE is filed under its lead artist when that artist exists; anything larger is an owner decision |
 
 ### The apparatus — what all of this runs on
 
