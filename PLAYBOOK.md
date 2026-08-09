@@ -678,3 +678,54 @@ artist's former names, check near-miss spellings of the title, and check
 whether an empty folder's twin under another name holds the audio. An empty
 shell is evidence of a MOVE at least as often as of a deletion.
 **Scope:** interpreting any manifest or diff loss report
+
+### L46 — A media server's own "am I busy?" flag is an opinion; wait on the outcome instead
+**What happened:** A three-file regrouping burned about forty minutes and
+still failed, and none of it was the scanner being slow. Three separate
+signals reported success while doing nothing. A directory-scoped scan request
+returned 200 and scanned nothing — proven when the server went on listing 16
+tracks in a folder that had already been moved, then dropped all 16 the moment
+a whole-library scan ran. The `refreshing` flag read *idle* ten seconds after
+a scan that provably had not started, so every "wait for the scan to finish"
+loop exited immediately and the caller concluded the work was done. Files were
+moved out of the library entirely and the server did not notice for 40
+minutes.
+**Lesson:** never wait on a status field; wait on the thing you actually want
+to be true ("does this album now hold three tracks"), and make the timeout
+return FAILURE rather than falling through as if it succeeded. A status field
+is the service's opinion; the outcome is evidence. And if interrupting the
+service is cheap — a scan that resumes from disk costs nothing to redo —
+cancel it and take the server rather than queueing behind it politely.
+**Scope:** any long-running service with a progress API
+
+### L47 — Moving files does not make a media server re-derive anything
+**What happened:** A split EP — three tracks by three different bands in one
+folder — rendered as three one-track albums under three artists. The
+`albumartist` tag was corrected on disk, which is the documented fix, and the
+server kept all three albums. Then the files were moved out of the library and
+back: no change. Then the folder was renamed, on the theory that a new path
+means a new object: the server simply followed the rename and kept all three
+stale objects, repointed. What finally worked was the server's own **merge**
+call, which completed instantly and survived a rescan.
+**Lesson:** correcting tags governs how NEW objects are built, not how
+existing ones are grouped — and you cannot force a rebuild by shuffling files,
+because the server tracks content across moves and renames. Find the API that
+changes the thing you want changed. Repeatedly poking a system from the
+outside hoping it recomputes is a sign you have not found the right call.
+Order matters: fix the underlying data FIRST, then perform the operation, or
+the next scan recreates exactly what you merged away.
+**Scope:** any library server that groups files into higher-level objects
+
+### L48 — Marking an edition in the title fails when the UI truncates it
+**What happened:** Two genuinely different masters of one album — a 16-bit
+three-disc edition and a verified 24-bit transfer — were deliberately kept as
+separate releases, with the second marked `[24-bit]` in the name. Correct by
+policy, and useless in practice: the grid truncates long titles, so both tiles
+truncated to the same first few words and looked like an unexplained
+duplicate. The owner reported it as new breakage. A SHORT title on the same
+artist had shown its marker fine, which is why the flaw went unnoticed.
+**Lesson:** a disambiguating marker has to be visible where the human actually
+looks. Check how the shelf renders, not just what the metadata says. If the
+title is long, either front-load the marker or accept a merge — and ask,
+because that is a taste call with real trade-offs, not a mechanical fix.
+**Scope:** any keep-both-editions policy

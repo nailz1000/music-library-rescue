@@ -67,7 +67,7 @@ The guide is what was learned; this is **how it was learned** — the two
 registers that kept mistakes from repeating, plus full transparency about the
 apparatus. Every entry below links to its full write-up.
 
-### The playbook — 45 lessons with receipts
+### The playbook — 48 lessons with receipts
 
 Each entry in [PLAYBOOK.md](PLAYBOOK.md) records a real incident: what
 happened (with the numbers), the transferable rule, and its scope. Written
@@ -120,6 +120,9 @@ while the mistake stung; cited by number ever since.
 | [L43](PLAYBOOK.md#l43--a-whole-folder-credit-defeats-modal-evidence-file-under-the-credits-lead-only-if-that-artist-exists) | A whole-folder credit defeats modal evidence; file under the credit's LEAD, only if that artist EXISTS |
 | [L44](PLAYBOOK.md#l44--a-tools-size-threshold-is-load-bearing-raising-it-turns-cleanup-into-demolition) | A tool's size threshold is load-bearing; raising it turns cleanup into demolition |
 | [L45](PLAYBOOK.md#l45--a-vanished-album-may-be-an-empty-shell-search-former-names-before-concluding-loss) | A "vanished" album may be an empty SHELL; search former names before concluding loss |
+| [L46](PLAYBOOK.md#l46--a-media-servers-own-am-i-busy-flag-is-an-opinion-wait-on-the-outcome-instead) | A media server's own "am I busy?" flag is an opinion; wait on the OUTCOME instead |
+| [L47](PLAYBOOK.md#l47--moving-files-does-not-make-a-media-server-re-derive-anything) | Moving files does not make a media server re-derive anything |
+| [L48](PLAYBOOK.md#l48--marking-an-edition-in-the-title-fails-when-the-ui-truncates-it) | Marking an edition in the title fails when the UI truncates it |
 
 ### The decision register — 16 decisions
 
@@ -146,6 +149,7 @@ bugs, and no decision silently hardens into dogma.
 | [D14](DECISIONS.md#d14--an-automated-blocklist-never-triggers-a-re-search) | An automated blocklist NEVER triggers a re-search |
 | [D15](DECISIONS.md#d15--this-register-stands-alone-it-never-points-at-a-repo-the-reader-cant-open-2026-08-03) | This register stands ALONE; it never points at a repo the reader can't open |
 | [D16](DECISIONS.md#d16--a-credited-single-is-filed-under-its-lead-artist-when-that-artist-exists-anything-larger-is-an-owner-decision-2026-08-08) | A credited SINGLE is filed under its lead artist when that artist exists; anything larger is an owner decision |
+| [D17](DECISIONS.md#d17--placeholder-tags-are-worse-than-empty-ones-and-need-their-own-tool) | Placeholder tags are worse than EMPTY ones, and need their own tool |
 
 ### The apparatus — what all of this runs on
 

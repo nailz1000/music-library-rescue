@@ -288,3 +288,31 @@ decided by the owner, one at a time, and each went a different way:
 
 **Revisit if:** singles start arriving for leads deliberately not collected —
 that would argue for creating the lead artist folder rather than requiring it.
+
+### D17 — Placeholder tags are worse than empty ones, and need their own tool
+A retagger built to fill EMPTY fields explicitly refuses to overwrite a field
+that has a value — the right rule, and exactly why this class slips past it. A
+CD ripper that cannot reach a metadata service does not leave the fields
+blank; it writes junk into them: `artist = "no artist"`, `album = "no title"`,
+`title = "AudioTrack 01"`. Everything downstream then treats that as real. The
+media server built an **artist entity named "no artist"**, matched it to the
+correct musician's biography and photograph (the folder name got it that far),
+and filed the single under a band that does not exist.
+
+**Decision:** detect placeholder VOCABULARIES separately from empty fields,
+and treat them as fillable.
+
+**The digit is the discriminator.** A first pass flagged 20 files and five were
+false positives — `Untitled` is a real song title on several well-known
+records. `Untitled` is a title; `Untitled 3` is a ripper counting. Requiring a
+trailing number dropped every false positive and kept every true hit.
+
+**Recover only what the files actually prove.** Three demo tracks were fixed
+from their own filenames, which carried the songs, and a fourth file in the
+same folder already demonstrated the naming convention — nothing was guessed.
+A second album could NOT be fixed the same way, because its filenames repeat
+the placeholder (`… - 03 - Track 03.mp3`); those titles need the real
+tracklist and were left for a lookup rather than typed from memory.
+
+**Revisit if:** a ripper is found writing a placeholder vocabulary not in the
+list. Add it there rather than in a one-off script.
