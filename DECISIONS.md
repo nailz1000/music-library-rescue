@@ -316,3 +316,41 @@ tracklist and were left for a lookup rather than typed from memory.
 
 **Revisit if:** a ripper is found writing a placeholder vocabulary not in the
 list. Add it there rather than in a one-off script.
+
+### D18 — Identify by four methods before discarding anything
+
+**Decision:** a stray or apparently-redundant file is only a deletion candidate
+after ALL FOUR of these come back empty:
+
+1. a release ID written in the file's own tags;
+2. a duration-profile match against a NAMED release;
+3. a title-and-duration match against what the library already holds, folding
+   `&`/`and`, accents and quote styles to the same token;
+4. a recording search under the artist the tags claim.
+
+**Why the order matters.** Six loose files that all looked like identical junk
+— same bitrate, same placeholder album tag — resolved into four different
+outcomes: one redundant copy of a mix already held losslessly, one identified
+to a real compilation the library does not own, one probable duplicate, and
+three genuine unknowns. Stopping after the first method would have discarded a
+track that could be placed.
+
+**A tag asserting an artist is not evidence of one.** Three of those files
+matched no recording under the artist their tags named. Fan remixes, mislabelled
+files and bootlegs all present exactly this way — which is the case for
+verifying that what you hold is what it says it is, rather than only hunting
+for defects. A clean defect report on an unverified folder proves nothing.
+
+**Never invent a container instead of identifying.** Filing unknowns into a
+folder named after a ripper's placeholder tag was rejected outright: a folder
+name that asserts something unverified is worse than a loose file, because it
+looks handled.
+
+**Deletion means quarantine, not unlinking.** Every discard in this project
+went to a recycle location first. That is what made it affordable when a
+duplicate verdict turned out to be wrong on fifteen files (PLAYBOOK L52) — the
+cost was fifteen minutes rather than a re-acquisition.
+
+**Revisit if:** an acoustic-fingerprint lookup becomes available for the
+"is this even the right artist?" question, which none of the four methods
+answers directly.

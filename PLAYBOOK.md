@@ -729,3 +729,199 @@ looks. Check how the shelf renders, not just what the metadata says. If the
 title is long, either front-load the marker or accept a merge — and ask,
 because that is a taste call with real trade-offs, not a mechanical fix.
 **Scope:** any keep-both-editions policy
+
+### L49 — The dangerous failures are the ones that look like good news
+**What happened:** In a single working session, five separate bugs all failed
+in the same direction. A patch left a checker unparseable, so it printed
+nothing and exited — and "no output" was read as "no problems found" across two
+artists. A copy command run with a no-clobber flag *declined* to overwrite,
+exited 0, and its `&& echo OK` guard duly printed OK for a copy that never
+happened; the retag that followed rewrote the wrong file. A tag reader looked
+only at raw container keys, so files in the other container format appeared
+untagged and were SKIPPED rather than flagged. A metadata lookup that returned
+a rate-limit error was caught and reported as "no such release". A directory
+listing that came back short under load read as "the folder is empty" — and an
+empty folder is what licenses a delete.
+**Lesson:** a system that fails toward *silence* is far more dangerous than one
+that fails loudly, because silence is indistinguishable from success. Audit
+every check for what it does when it cannot do its job. "I looked and found
+nothing" and "I could not look" must be different return values — None or an
+exception, never an empty list, never a falsy zero. And never accept silence as
+a pass: verify the thing actually RAN (exit code, a section header, a count)
+before believing what it did not say.
+**Scope:** every automated check you will ever write
+
+### L50 — A subprocess that reads stdin will eat the script it was piped inside
+**What happened:** A tool generated a shell script and piped it to a remote
+`bash -s`. One line ran a media decoder. The decoder reads stdin for
+interactive commands, and stdin *was the rest of the script* — so it swallowed
+the remaining commands. Line one ran, line two was consumed whole, line three
+lost its first two characters, and the shell died on the remainder. The command
+still exited 0 with a plausible partial result, so files that were never
+checked were indistinguishable from files that passed. Two independent workers
+hit this on the same day; one caught it, one did not — and the one that did not
+concluded a dozen files were identical when none were.
+**Lesson:** any command inside a piped script needs its stdin closed explicitly
+— a no-stdin flag AND a `< /dev/null` redirect, because the redirect also
+covers tools with no such flag. Note that a `for` loop MASKS this entirely,
+since the loop body's stdin is not the script stream; hand-run spot checks in a
+loop will look perfect while the real tool is broken.
+**Scope:** any generated script piped to a shell, local or remote
+
+### L51 — Verify a file operation by its CONTENT, never by its metadata
+**What happened:** A better copy of a track was moved into place over a worse
+one. Afterwards the file was the expected size, the tags were right, the
+filename was right, the folder listing was right, and the reported duration was
+right. Every surface agreed the operation had succeeded. It had not — the copy
+had silently declined, and the audio was still the old version. The only thing
+that revealed it was the checksum of the *decoded* audio stored inside the file
+header.
+**Lesson:** size, tags, name and duration are all things a wrong outcome can
+also satisfy. Lossless formats carry a checksum of the unencoded audio; use it,
+or hash the decoded stream. If you are asserting two files hold the same
+recording, or that a replacement worked, nothing short of content is evidence.
+**Scope:** every move, copy, dedupe and replacement
+
+### L52 — "All N compared equal" is a red flag, not a result
+**What happened:** A pass quarantined twelve files as byte-identical duplicates
+of an album already held. Independent re-verification found **none** of them
+identical: same duration to the centisecond, same declared format, different
+audio, and an 18 kb/s bitrate gap as the only surface hint. They were a
+different master. The comparison had run through a loop that was silently
+hashing empty input, so every file returned the same hash — which reads exactly
+like a clean sweep.
+**Lesson:** real libraries do not produce perfect agreement across a dozen
+files. When a comparison returns *everything matches*, suspect the comparison
+before believing the conclusion — and re-verify with a DIFFERENT mechanism than
+the one that produced it. Two runs of the same broken loop agree perfectly.
+**Scope:** any bulk dedupe or "these are the same" verdict
+
+### L53 — Fixing the files is not finishing the job
+**What happened:** A batch of artists was repaired on disk — folders split,
+album tags unified, years corrected — and verified file by file. The owner then
+opened the library app and saw three tiles for one album, two for another, and
+ten separate entries for a single folder. Every one of those folders was
+already correct on disk with a single consistent album tag. The server simply
+never re-derived its grouping.
+**Lesson:** a media server caches its own objects and a rescan does not rebuild
+them. Tag changes need an explicit per-object refresh; objects already split
+apart only rejoin via an explicit merge. Budget the server reconciliation as a
+step of the job, not an afterthought, and make it a tool rather than something
+you remember to do — otherwise correct work looks unfinished to the only person
+who sees it.
+**Scope:** any pipeline where a server sits downstream of the files
+
+### L54 — One folder, two spellings of the album name, two albums on the shelf
+**What happened:** An album folder held ten files whose album tag capitalised a
+word and two that did not. The server groups on the exact album string, so it
+drew the album twice. Nothing detected it: the existing check compared folders
+to *each other* and was structurally blind to a folder disagreeing with itself.
+Once looked for, it appeared in 10 folders across the first 12 artists.
+**Lesson:** check tag consistency WITHIN a folder, including case, before
+checking across folders. Unify to the canonical title from your metadata
+source, not to the majority spelling — the majority is frequently the wrong
+one.
+**Scope:** any tag-driven grouping
+
+### L55 — A folder's year tracks the ORIGINAL release; the date tag tracks the edition
+**What happened:** A check compared each folder's year against the most common
+`date` tag and fired on album after album. Every one was correctly tagged: the
+folder year tracked the release-group's first release, while `date` named the
+specific edition actually held — a reissue's date legitimately differs. The
+check invited a "fix" that would have rewritten correct edition dates across
+the library. A worker refused three of its own findings and proved them right,
+which is the only reason nothing was damaged.
+**Lesson:** these are two different facts and they need two different fields:
+`originaldate` for the original release, `date` for the edition in hand.
+Compare the folder against `originaldate`, and treat a missing one as weaker
+evidence rather than a defect. Watch for the mirror case too — a folder
+explicitly NAMED as an edition tracks the edition's year, so there the two
+SHOULD differ. And a junk `originaldate` (`0001-01-01`, or an `originalyear` of
+`1`) is its own finding: parse strictly enough that a tagger's null cannot be
+mistaken for a year.
+**Scope:** any library holding reissues, remasters or deluxe editions
+
+### L56 — Files that belong to no album are invisible to checks that group by album
+**What happened:** Loose tracks sitting directly in an artist folder were
+collected by nothing, because the grouping step only kept files at least two
+levels deep. They were still counted in the headline "N audio files", so the
+artist read as fully accounted for. The owner spotted six by eye that the tool
+had never once mentioned; a library-wide count then found 103 across 35
+artists.
+**Lesson:** anything your grouping step discards is a blind spot, and a total
+that includes discarded items actively conceals it. Count what you grouped and
+report the remainder explicitly. The same audit surfaces a related structural
+problem: entries at artist level that are really ALBUM titles with their tracks
+loose inside.
+**Scope:** any hierarchical scan
+
+### L57 — Duration identifies a track; it does not place it within a large release
+**What happened:** Matching local files to a 45-track box set by
+closest-duration-first handed one song's slot to an unrelated track of
+identical length, leaving the real one unplaceable. Separately, a title match
+failed because one side wrote `&` and the other wrote `and`, so a redundant
+copy was reported as unique.
+**Lesson:** order your matching — a title occurring exactly once on each side
+is an identity, and duration gets no veto over it (the same track can appear as
+a 3:56 single edit and a 5:51 album version). Fall back to duration only for
+the drifting titles. Normalise `&`/`and`, accents and quote styles before
+comparing, and refuse the whole folder if any file is left unplaced: a partial
+renumber looks repaired and is not.
+**Scope:** box sets, compilations, any release over ~20 tracks
+
+### L58 — Parallel workers sharing one scratch directory overwrite each other
+**What happened:** Six agents worked different artists concurrently, each
+writing helper scripts to a shared scratch directory under generic names. One
+worker's apply script was silently REPLACED mid-run by another's — targeting
+different artists, with its own destructive plan and its own apply flag. It was
+caught only because an argument mismatch aborted before the foreign code ran.
+**Lesson:** namespace every worker's files under its own subdirectory; re-read
+a script before executing it, because a file written minutes ago may not be the
+file that is there now; and put a hard path guard INSIDE anything destructive
+that asserts every target is within that worker's assigned scope. The guard is
+the one that works without anyone noticing anything is wrong.
+**Scope:** any parallel or multi-agent pipeline
+
+### L59 — Your library manager tracks one release per album; keeping both masters hides one
+**What happened:** An artist's albums were deliberately kept in both original
+and remastered form — a defensible policy, and correct in the media server,
+which showed two clearly distinguished entries. The acquisition manager,
+however, models one album per release-group and holds one file per track. It
+matched the remaster of every pair and left the originals entirely untracked,
+while reporting the artist as **100/100 complete**. 55 of 155 files were
+invisible to it.
+**Lesson:** "complete" from a tool that models only one release per album is a
+false clean signal wherever you keep two. It will never monitor, upgrade or
+repair the copy it does not know about. Decide keep-both with that cost stated
+rather than discovering it later, and never use that tool's completeness figure
+as a library-wide health metric.
+**Scope:** any setup pairing a media server with an acquisition manager
+
+### L60 — An unbounded child process outlives its session and taxes everything after it
+**What happened:** A verification pass spawned a decoder per file with no time
+limit. One decode hung, the parent session ended, and the orphan kept running —
+139 CPU-minutes on a single file, holding the storage server at load 3.0. For
+the next two hours every operation was slow, server scans looked broken, and a
+folder appeared not to be indexed. All of it was blamed on the wrong
+subsystems. The owner asked whether the scan was interfering; it was.
+**Lesson:** bound every spawned process with a timeout, and check system load
+before diagnosing "the server is being weird". A background job you started and
+forgot is the first suspect for unexplained slowness, not the last.
+**Scope:** any batch that shells out per file
+
+### L61 — A suppression list not bound to its evidence becomes a blindfold
+**What happened:** A walk over hundreds of artists kept re-reporting findings
+already reviewed and accepted — two genuinely different releases that share a
+name, dozens of small folders that are real singles. The obvious fix, a list of
+"don't tell me again", quietly introduces a worse failure: the list outlives
+the thing it described, and the finding stops being reported after it stops
+being true.
+**Lesson:** bind an acceptance to the EVIDENCE, not the name. Store the item's
+identity *and* a hash of the finding's rendered detail — file counts, formats,
+years, the other folder in the pair. Then matching has three outcomes rather
+than two: suppressed, re-reported because the evidence changed, or new. Print
+the suppressed COUNT on every run, require a written reason, and record
+acceptances through the tool itself so the fingerprint always matches something
+really produced. Accept only what has actually been examined — accepting a
+whole class to quiet a report is how a real defect gets buried.
+**Scope:** any long-running audit a human reviews repeatedly

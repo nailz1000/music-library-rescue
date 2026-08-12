@@ -1,6 +1,6 @@
 # Tools
 
-Three standalone Python scripts. Requirements: Python 3.8+, `mutagen`
+Four standalone Python scripts. Requirements: Python 3.8+, `mutagen`
 (`pip install mutagen`), and `ffmpeg` on PATH (fingerprinting only — it uses
 the Chromaprint muxer already built into ffmpeg, so there is no separate
 fpcalc/acoustid dependency).
@@ -64,3 +64,23 @@ verify. Verification is a MusicBrainz release-by-ID lookup on the flagged ~10%
 (matched by FLAC's decoded-audio MD5) / **removed** — exit code 1 if anything
 was removed without a matching move, which makes it usable as a guard in
 scripts.
+
+## `flac_integrity.py` — is the audio underneath actually intact?
+
+    python flac_integrity.py /path/to/music
+    python flac_integrity.py /path/to/music --decode --json findings.jsonl
+
+Every other check here asks whether the metadata is right. This asks whether
+the file decodes. The headline test needs no decoding at all: a FLAC's audio
+payload cannot exceed the uncompressed size its own header implies, so anything
+larger is corrupt by arithmetic. That is cheap enough to run across a whole
+library, and it found a track that had been sitting unplayable for years behind
+a correct title, correct track number and a file size that read as "high
+quality".
+
+Also reports ID3-prefixed FLACs (intact audio behind an ID3v2 block — cosmetic,
+NOT corruption), suspiciously small files, and, counted by folder rather than
+listed, files whose header carries no PCM checksum.
+
+Read-only. `--decode` shells out to ffmpeg with a per-file timeout and closed
+stdin, for the reasons in PLAYBOOK L50 and L60.
