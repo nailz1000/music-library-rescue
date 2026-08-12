@@ -30,7 +30,11 @@ guessed.
    to delete" is proven, not pattern-matched.
 5. **A claim isn't a measurement.** Track totals written by a ripper, folder
    names, release dates in tags — all are claims. The guide is explicit about
-   which checks *verify* and which merely *fail to find evidence*.
+   which checks *verify* and which merely *fail to find evidence*. The
+   corollary is the most expensive lesson here (L49): a check that **cannot do
+   its job** must never return what a check that **found nothing** returns.
+   Silence is indistinguishable from success, and every tool in this guide that
+   ever produced a confidently wrong answer failed in that direction.
 
 ## Start here
 
@@ -60,6 +64,7 @@ Each is standalone and dry-run-first. See [tools/README.md](tools/README.md).
 | [`fingerprint.py`](tools/fingerprint.py) | "Are these two files the same recording?" — by sound |
 | [`library_manifest.py`](tools/library_manifest.py) | "What exactly do I have?" — streaming, resumable, lock-guarded walk of every file's audio properties and tags |
 | [`library_triage.py`](tools/library_triage.py) | "Where is the work?" — stacked-release and completeness triage off the manifest, zero network |
+| [`flac_integrity.py`](tools/flac_integrity.py) | "Does the audio underneath actually decode?" — header arithmetic catches corrupt files with no decoding at all |
 
 ## The method itself
 
@@ -67,7 +72,7 @@ The guide is what was learned; this is **how it was learned** — the two
 registers that kept mistakes from repeating, plus full transparency about the
 apparatus. Every entry below links to its full write-up.
 
-### The playbook — 48 lessons with receipts
+### The playbook — 61 lessons with receipts
 
 Each entry in [PLAYBOOK.md](PLAYBOOK.md) records a real incident: what
 happened (with the numbers), the transferable rule, and its scope. Written
@@ -103,7 +108,7 @@ while the mistake stung; cited by number ever since.
 | [L26](PLAYBOOK.md#l26--hunt-failures-by-severity-not-recency-the-tail-of-a-busy-log-is-all-chatter) | Hunt failures by SEVERITY, not recency; the tail of a busy log is all chatter |
 | [L27](PLAYBOOK.md#l27--validate-a-liveness-check-against-something-known-alive-before-acting-on-it-died) | Validate a liveness check against something known-alive before acting on "it died" |
 | [L28](PLAYBOOK.md#l28--diagnose-from-a-fresh-measurement-not-from-the-last-thing-you-wrote) | Diagnose from a fresh measurement, not from the last thing you wrote |
-| [L29](PLAYBOOK.md#l29--a-compilation-shatters-into-one-album-per-performer-when-album_artist-is-the-track-artist) | A compilation shatters into one album PER performer when album_artist is the TRACK artist |
+| [L29](PLAYBOOK.md#l29--a-compilation-shatters-into-one-album-per-performer-when-albumartist-is-the-track-artist) | A compilation shatters into one album PER performer when album_artist is the TRACK artist |
 | [L30](PLAYBOOK.md#l30--splitting-a-cue-image-rip-has-two-silent-no-op-traps) | Splitting a cue-image rip has two silent-no-op traps |
 | [L31](PLAYBOOK.md#l31--before-importing-a-rip-check-the-library-already-holds-it--equal-or-better) | Before importing a rip, check the library already holds it — equal or better |
 | [L32](PLAYBOOK.md#l32--a-formatquality-claim--in-a-tag-a-release-name-or-an-encoders-silence--is-not-the-audio) | A format/quality claim — in a tag, a release name, or an encoder's silence — is not the audio |
@@ -120,11 +125,24 @@ while the mistake stung; cited by number ever since.
 | [L43](PLAYBOOK.md#l43--a-whole-folder-credit-defeats-modal-evidence-file-under-the-credits-lead-only-if-that-artist-exists) | A whole-folder credit defeats modal evidence; file under the credit's LEAD, only if that artist EXISTS |
 | [L44](PLAYBOOK.md#l44--a-tools-size-threshold-is-load-bearing-raising-it-turns-cleanup-into-demolition) | A tool's size threshold is load-bearing; raising it turns cleanup into demolition |
 | [L45](PLAYBOOK.md#l45--a-vanished-album-may-be-an-empty-shell-search-former-names-before-concluding-loss) | A "vanished" album may be an empty SHELL; search former names before concluding loss |
-| [L46](PLAYBOOK.md#l46--a-media-servers-own-am-i-busy-flag-is-an-opinion-wait-on-the-outcome-instead) | A media server's own "am I busy?" flag is an opinion; wait on the OUTCOME instead |
+| [L46](PLAYBOOK.md#l46--a-media-servers-own-am-i-busy-flag-is-an-opinion-wait-on-the-outcome-instead) | A media server's own "am I busy?" flag is an opinion; wait on the outcome instead |
 | [L47](PLAYBOOK.md#l47--moving-files-does-not-make-a-media-server-re-derive-anything) | Moving files does not make a media server re-derive anything |
 | [L48](PLAYBOOK.md#l48--marking-an-edition-in-the-title-fails-when-the-ui-truncates-it) | Marking an edition in the title fails when the UI truncates it |
+| [L49](PLAYBOOK.md#l49--the-dangerous-failures-are-the-ones-that-look-like-good-news) | The dangerous failures are the ones that look like good news |
+| [L50](PLAYBOOK.md#l50--a-subprocess-that-reads-stdin-will-eat-the-script-it-was-piped-inside) | A subprocess that reads stdin will eat the script it was piped inside |
+| [L51](PLAYBOOK.md#l51--verify-a-file-operation-by-its-content-never-by-its-metadata) | Verify a file operation by its CONTENT, never by its metadata |
+| [L52](PLAYBOOK.md#l52--all-n-compared-equal-is-a-red-flag-not-a-result) | "All N compared equal" is a red flag, not a result |
+| [L53](PLAYBOOK.md#l53--fixing-the-files-is-not-finishing-the-job) | Fixing the files is not finishing the job |
+| [L54](PLAYBOOK.md#l54--one-folder-two-spellings-of-the-album-name-two-albums-on-the-shelf) | One folder, two spellings of the album name, two albums on the shelf |
+| [L55](PLAYBOOK.md#l55--a-folders-year-tracks-the-original-release-the-date-tag-tracks-the-edition) | A folder's year tracks the ORIGINAL release; the date tag tracks the edition |
+| [L56](PLAYBOOK.md#l56--files-that-belong-to-no-album-are-invisible-to-checks-that-group-by-album) | Files that belong to no album are invisible to checks that group by album |
+| [L57](PLAYBOOK.md#l57--duration-identifies-a-track-it-does-not-place-it-within-a-large-release) | Duration identifies a track; it does not place it within a large release |
+| [L58](PLAYBOOK.md#l58--parallel-workers-sharing-one-scratch-directory-overwrite-each-other) | Parallel workers sharing one scratch directory overwrite each other |
+| [L59](PLAYBOOK.md#l59--your-library-manager-tracks-one-release-per-album-keeping-both-masters-hides-one) | Your library manager tracks one release per album; keeping both masters hides one |
+| [L60](PLAYBOOK.md#l60--an-unbounded-child-process-outlives-its-session-and-taxes-everything-after-it) | An unbounded child process outlives its session and taxes everything after it |
+| [L61](PLAYBOOK.md#l61--a-suppression-list-not-bound-to-its-evidence-becomes-a-blindfold) | A suppression list not bound to its evidence becomes a blindfold |
 
-### The decision register — 16 decisions
+### The decision register — 18 decisions
 
 Each entry in [DECISIONS.md](DECISIONS.md) is an intentional choice with its
 reasoning, the measured cost of the alternative, a narrow scope, and a
@@ -133,23 +151,24 @@ bugs, and no decision silently hardens into dogma.
 
 | # | decision |
 |---|---|
-| [D1](DECISIONS.md#d1--on-disk-naming-follows-the-file-tags-not-the-managers-metadata-source) | On-disk naming follows the FILE TAGS, not the manager's metadata source |
-| [D2](DECISIONS.md#d2--unknown-album-clutter-is-fixed-by-writing-tags-never-by-deleting) | "Unknown Album" clutter is fixed by WRITING tags, never by deleting |
-| [D3](DECISIONS.md#d3--cleanup-trash-is-reversible-native-recycle-bin-or-a-quarantine-folder) | Cleanup "trash" is reversible: native recycle bin, or a quarantine folder |
-| [D4](DECISIONS.md#d4--same-recording-is-decided-by-sound-not-filename-tags-or-bytes) | "Same recording?" is decided by SOUND, not filename, tags, or bytes |
-| [D5](DECISIONS.md#d5--official-release-data-comes-from-whats-already-running-before-any-new-tool) | Official release data comes from what's ALREADY RUNNING before any new tool |
-| [D6](DECISIONS.md#d6--the-restrictive-metadata-profile-is-the-default-permissive-is-opt-in-per-artist) | The restrictive metadata profile is the DEFAULT; permissive is opt-in per artist |
-| [D7](DECISIONS.md#d7--upgrade-propagation-requires-three-independent-guards-the-fingerprint-alone-is-insufficient) | Upgrade propagation requires three independent guards; the fingerprint alone is insufficient |
-| [D8](DECISIONS.md#d8--release-type-livestudio-is-measured-from-the-audio-not-inferred-from-names) | Release type (live/studio) is MEASURED from the audio, not inferred from names |
-| [D9](DECISIONS.md#d9--the-media-server-groups-by-identity-embedded-in-files-that-identity-is-inherited-from-wherever-a-track-was-ripped) | The media server groups by identity EMBEDDED IN FILES — inherited from wherever a track was ripped |
-| [D10](DECISIONS.md#d10--tags-are-fixed-before-the-scan-that-builds-album-objects) | Tags are fixed BEFORE the scan that builds album objects |
-| [D11](DECISIONS.md#d11--a-distinct-release-shows-the-year-it-came-out-never-its-parents) | A distinct release shows the year IT came out, never its parent's |
-| [D12](DECISIONS.md#d12--cd-and-vinyl-any-two-distinct-masters-of-one-album-are-kept-as-separate-releases-distinguished-in-the-name) | CD and vinyl (any two distinct MASTERS) of one album are kept as SEPARATE releases, distinguished in the name |
-| [D13](DECISIONS.md#d13--hi-res--lossless-container-rips-are-down-converted-to-a-96-khz--24-bit-ceiling-and-that-counts-as-lossless) | Hi-res / lossless-container rips are down-converted to a 96 kHz / 24-bit ceiling, and that counts as "lossless" |
-| [D14](DECISIONS.md#d14--an-automated-blocklist-never-triggers-a-re-search) | An automated blocklist NEVER triggers a re-search |
-| [D15](DECISIONS.md#d15--this-register-stands-alone-it-never-points-at-a-repo-the-reader-cant-open-2026-08-03) | This register stands ALONE; it never points at a repo the reader can't open |
-| [D16](DECISIONS.md#d16--a-credited-single-is-filed-under-its-lead-artist-when-that-artist-exists-anything-larger-is-an-owner-decision-2026-08-08) | A credited SINGLE is filed under its lead artist when that artist exists; anything larger is an owner decision |
-| [D17](DECISIONS.md#d17--placeholder-tags-are-worse-than-empty-ones-and-need-their-own-tool) | Placeholder tags are worse than EMPTY ones, and need their own tool |
+| [D1](DECISIONS.md#d1--on-disk-naming-follows-the-file-tags-not-the-managers-metadata-source-2026-07-24) | On-disk naming follows the FILE TAGS, not the manager's metadata source (2026-07-24) |
+| [D2](DECISIONS.md#d2--unknown-album-clutter-is-fixed-by-writing-tags-never-by-deleting-2026-07-24) | "Unknown Album" clutter is fixed by WRITING tags, never by deleting (2026-07-24) |
+| [D3](DECISIONS.md#d3--cleanup-trash-is-reversible-native-recycle-bin-or-a-quarantine-folder-2026-07-24) | Cleanup "trash" is reversible: native recycle bin, or a quarantine folder (2026-07-24) |
+| [D4](DECISIONS.md#d4--same-recording-is-decided-by-sound-not-filename-tags-or-bytes-2026-07-24) | "Same recording?" is decided by SOUND, not filename, tags, or bytes (2026-07-24) |
+| [D5](DECISIONS.md#d5--official-release-data-comes-from-whats-already-running-before-any-new-tool-2026-07-24) | Official release data comes from what's ALREADY RUNNING before any new tool (2026-07-24) |
+| [D6](DECISIONS.md#d6--the-restrictive-metadata-profile-is-the-default-permissive-is-opt-in-per-artist-2026-07-24) | The restrictive metadata profile is the DEFAULT; permissive is opt-in per artist (2026-07-24) |
+| [D7](DECISIONS.md#d7--upgrade-propagation-requires-three-independent-guards-the-fingerprint-alone-is-insufficient-2026-07-24) | Upgrade propagation requires three independent guards; the fingerprint alone is insufficient (2026-07-24) |
+| [D8](DECISIONS.md#d8--release-type-livestudio-is-measured-from-the-audio-not-inferred-from-names-2026-07-24) | Release type (live/studio) is MEASURED from the audio, not inferred from names (2026-07-24) |
+| [D9](DECISIONS.md#d9--the-media-server-groups-by-identity-embedded-in-files-that-identity-is-inherited-from-wherever-a-track-was-ripped-2026-07-24) | The media server groups by identity EMBEDDED IN FILES; that identity is inherited from wherever a track was ripped (2026-07-24) |
+| [D10](DECISIONS.md#d10--tags-are-fixed-before-the-scan-that-builds-album-objects-2026-07-24) | Tags are fixed BEFORE the scan that builds album objects (2026-07-24) |
+| [D11](DECISIONS.md#d11--a-distinct-release-shows-the-year-it-came-out-never-its-parents-2026-07-24) | A distinct release shows the year IT came out, never its parent's (2026-07-24) |
+| [D12](DECISIONS.md#d12--cd-and-vinyl-any-two-distinct-masters-of-one-album-are-kept-as-separate-releases-distinguished-in-the-name-2026-07-26) | CD and vinyl (any two distinct MASTERS) of one album are kept as SEPARATE releases, distinguished in the name (2026-07-26) |
+| [D13](DECISIONS.md#d13--hi-res--lossless-container-rips-are-down-converted-to-a-96-khz--24-bit-ceiling-and-that-counts-as-lossless-2026-07-26) | Hi-res / lossless-container rips are down-converted to a 96 kHz / 24-bit ceiling, and that counts as "lossless" (2026-07-26) |
+| [D14](DECISIONS.md#d14--an-automated-blocklist-never-triggers-a-re-search-2026-07-29) | An automated blocklist NEVER triggers a re-search (2026-07-29) |
+| [D15](DECISIONS.md#d15--this-register-stands-alone-it-never-points-at-a-repo-the-reader-cant-open-2026-08-03) | This register stands ALONE; it never points at a repo the reader can't open (2026-08-03) |
+| [D16](DECISIONS.md#d16--a-credited-single-is-filed-under-its-lead-artist-when-that-artist-exists-anything-larger-is-an-owner-decision-2026-08-08) | A credited SINGLE is filed under its lead artist when that artist exists; anything larger is an owner decision (2026-08-08) |
+| [D17](DECISIONS.md#d17--placeholder-tags-are-worse-than-empty-ones-and-need-their-own-tool) | Placeholder tags are worse than empty ones, and need their own tool |
+| [D18](DECISIONS.md#d18--identify-by-four-methods-before-discarding-anything) | Identify by four methods before discarding anything |
 
 ### The apparatus — what all of this runs on
 
