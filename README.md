@@ -47,11 +47,11 @@ ordered steps for each. Read it first; it points into the chapters below.
 | chapter | what it covers |
 |---|---|
 | [0 — Workflow](docs/00-workflow.md) | The front door: pick your setup, get the ordered steps, disk → Lidarr → tags → Plex |
-| [1 — How Plex groups music](docs/01-how-plex-groups-music.md) | The four embedded identity signals, why fixing tags doesn't fix built albums, the merge/unmatch/rebuild repair ladder, API traps |
-| [2 — Diagnosing a messy artist](docs/02-diagnosing-a-messy-artist.md) | The layer model, the merge-vs-split decision table, stacked folders, box sets that only look broken |
-| [3 — Duplicates and quality](docs/03-duplicates-and-quality.md) | The quality ladder and how it's miscomputed, fake hi-res/lossless detection, fingerprinting thresholds, the three guards |
+| [1 — How Plex groups music](docs/01-how-plex-groups-music.md) | The four embedded identity signals plus `album_artist` (the compilation-shatter bug), why fixing tags doesn't fix built albums, CD-vs-vinyl same-tile rendering, the merge/unmatch/rebuild repair ladder, API traps |
+| [2 — Diagnosing a messy artist](docs/02-diagnosing-a-messy-artist.md) | The layer model, the merge-vs-split decision table, stacked folders, box sets that only look broken, a shattered compilation masquerading as several artists |
+| [3 — Duplicates and quality](docs/03-duplicates-and-quality.md) | The quality ladder and how it's miscomputed, fake hi-res/lossless detection, fingerprinting thresholds, the three guards, splitting a cue-referenced album image, down-converting hi-res rips |
 | [4 — Triage at scale](docs/04-triage-at-scale.md) | Manifest-first workflow, the three-tier triage that avoids 90% of network calls, MusicBrainz by release ID |
-| [5 — Lidarr](docs/05-lidarr.md) | Metadata profile economics, what "unmatched" really means, the rescan-flood/SQLite-lock failure, config-volume trap |
+| [5 — Lidarr](docs/05-lidarr.md) | Metadata profile economics, what "unmatched" really means, the rescan-flood/SQLite-lock failure, config-volume trap, which copy of two masters the manager tracks, reconciling before importing a new rip |
 | [6 — Field notes](docs/06-field-notes.md) | SMB case aliases, orphan shells, running server-side, liveness checks, log-reading discipline |
 
 ## The tools
@@ -65,6 +65,8 @@ Each is standalone and dry-run-first. See [tools/README.md](tools/README.md).
 | [`library_manifest.py`](tools/library_manifest.py) | "What exactly do I have?" — streaming, resumable, lock-guarded walk of every file's audio properties and tags |
 | [`library_triage.py`](tools/library_triage.py) | "Where is the work?" — stacked-release and completeness triage off the manifest, zero network |
 | [`flac_integrity.py`](tools/flac_integrity.py) | "Does the audio underneath actually decode?" — header arithmetic catches corrupt files with no decoding at all |
+| [`cue_split.py`](tools/cue_split.py) | "This is one file with a `.cue` — how do I get real tracks?" — sample-accurate split, verified bit-perfect |
+| [`to_flac.py`](tools/to_flac.py) | "This rip is 384kHz/32-bit — do I really need to keep that?" — down-converts to a 96kHz/24-bit lossless ceiling |
 
 ## The method itself
 

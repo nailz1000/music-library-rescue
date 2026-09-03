@@ -57,14 +57,24 @@ The foundation. Everything else is this plus an app on top.
 3. **Fix stacked folders** — one folder = one release. Split the folders the
    triage flagged; confirm shapes against MusicBrainz by release ID (Tier 2).
    [Chapter 2](02-diagnosing-a-messy-artist.md) has the merge-vs-split logic.
-4. **De-duplicate** — where two files are the same recording, keep the better
+4. **Normalize format before de-duplicating.** A single file with a `.cue`
+   sidecar is one release wearing the wrong shape — split it into per-track
+   files first (`tools/cue_split.py`), or the next step's duration/
+   fingerprint guards have nothing comparable to work with. Down-convert
+   absurd-rate rips to a sane ceiling at the same time (`tools/to_flac.py`) —
+   comparing a 384 kHz file against a 96 kHz library copy by quality ladder
+   alone reports a fake "upgrade". [Chapter 3](03-duplicates-and-quality.md)
+   has both procedures.
+5. **De-duplicate** — where two files are the same recording, keep the better
    one. Decide "same recording?" by sound, not filename:
    ```
    python tools/fingerprint.py match <staged_dir> <library_dir>
    ```
    Then the quality ladder + the three guards (duration first!) decide the
-   keeper. [Chapter 3](03-duplicates-and-quality.md).
-5. **Re-manifest and diff** to prove you lost nothing.
+   keeper. Two distinct masters of the same album (e.g. a CD remaster and a
+   vinyl rip) are NOT duplicates — keep both, marked in the name.
+   [Chapter 3](03-duplicates-and-quality.md).
+6. **Re-manifest and diff** to prove you lost nothing.
 
 That's a clean library on disk. Stop here, or add an app below.
 
@@ -116,6 +126,12 @@ Do **Path A first**, then bring Lidarr onto the clean library.
    Lidarr throws `database is locked` and bulk imports fail. Do bulk imports on
    a *quiet* queue — stop rescans from spawning, one operation at a time.
    Chapter 5 has the recovery pattern.
+5. **Reconcile before importing anything new.** Before importing a freshly
+   downloaded or freshly converted rip, check whether the library already
+   holds it — equal or better — rather than assuming a gap; a "partly
+   matched" existing album is usually an orphaned-link problem, not a hole
+   to fill with a second copy.
+   [Chapter 5](05-lidarr.md#reconcile-before-importing--read-first-then-write).
 
 Lidarr manages downloads/upgrades and metadata; it does **not** render your
 library to you. If you only want a clean, browsable library, you may not need it.

@@ -137,6 +137,80 @@ edition` are **not** mastering markers — they usually mean "album plus bonus
 tracks, same mastering"; treating them as hazards blocked one of the best FLAC
 sources in the library.
 
+## Splitting a cue-referenced single-file album
+
+Some rips arrive as one long audio file per side (or per whole album) plus a
+`.cue` sheet that defines where each track starts — the common shape for
+vinyl transfers. The cue is the discriminator: **cue present -> splittable.
+A long lone file with NO cue might be a legitimate continuous mix or DJ
+set — that goes to manual review, never an automatic split.**
+
+The method, and why it's bit-perfect:
+
+1. Cue `INDEX MM:SS:FF` times use CD frames (`FF`, 1/75 second). For every
+   standard sample rate (44100, 48000, 88200, 96000, 176400, 192000 Hz),
+   dividing by 75 gives a whole number — so every track boundary lands on an
+   exact sample, no rounding.
+2. Cut with a sample-accurate trim (ffmpeg's `atrim=start_sample:end_sample`,
+   not a time-based cut) and re-encode to FLAC.
+3. **Prove it, don't assume it.** Decode the concatenated split tracks to
+   raw PCM and MD5 them against the original side's decoded PCM. A match
+   means the split reproduced the source byte-for-byte; anything else means
+   nothing downstream should trust it.
+
+[`tools/cue_split.py`](../tools/cue_split.py) implements this:
+
+    python tools/cue_split.py --folder "path/to/rip"                # dry run, auto-picks the cue
+    python tools/cue_split.py --cue "Side A.cue" --apply --verify
+
+Two traps that make a split silently do nothing, worth knowing even if you
+write your own splitter (PLAYBOOK L30):
+
+- **Never `glob` a scene-release folder name.** Names like `[001+114] Artist
+  - Album` contain `[...]`, which `glob` treats as a character class, not a
+  literal — it matches no files and looks exactly like an empty directory.
+  List with `os.listdir` and filter by suffix instead.
+- **The cue's `FILE` lines can name files that don't match what's on disk**
+  (a stray prefix tacked on by whoever built the rip). Resolve defensively:
+  exact match, then a stripped bracket/brace prefix, then position-order
+  mapping when the file counts agree on both sides — and refuse outright
+  rather than silently skipping an unresolvable track.
+
+## Down-converting hi-res and lossless-container rips
+
+Vinyl and other analog-sourced rips can arrive at absurd rates — 384 kHz /
+32-bit is a real shape a rip can carry. Above roughly 48 kHz and below 24
+bits, there's no music left in a vinyl-sourced signal (vinyl holds on the
+order of 12–14 bits of dynamic range and nothing above ~30 kHz) — that band
+is noise and empty ultrasonic spectrum. The policy (DECISIONS D13): cap at
+**96 kHz / 24-bit FLAC**, and count that as lossless even though it isn't
+bit-identical to the source, because the discarded band carries no signal.
+Measured example: a 384 kHz / 32-bit album shrank from 6.4 GB to 1.2 GB with
+nothing audible lost.
+
+Rule of thumb: keep native rate if ≤ 96 kHz, else resample to 96 kHz; keep
+16-bit sources at 16-bit (never inflate); anything deeper caps at 24-bit.
+
+Two traps in the mechanics, distinct from the policy itself (PLAYBOOK L32):
+
+- **Probe with a tool that actually parses the format.** A general metadata
+  library can silently report sample rate and bit depth as **zero** for an
+  exotic high-rate WavPack file it can't fully read — that's "couldn't
+  read", not "this file has no properties" — and trusting the zero as a
+  real value produces a wrong verdict. Cross-check a suspicious zero with a
+  second tool (e.g. ffmpeg's own header probe, which parses formats some
+  metadata libraries can't).
+- **An encoder that caps at 24-bit can silently truncate** a 32-bit source
+  instead of refusing — the result is a valid file whose decoded PCM no
+  longer matches the input. Verify the *output*, not just that the command
+  exited zero: check its actual sample rate/bit depth and, when it matters,
+  compare decoded PCM against the source.
+
+[`tools/to_flac.py`](../tools/to_flac.py) applies this policy:
+
+    python tools/to_flac.py --folder "path/to/rip"          # dry run
+    python tools/to_flac.py --folder "path/to/rip" --apply  # writes <folder>/flac/
+
 ## Small findings that recur
 
 - **Punctuation variants are real duplicates**: `Grails Mysteries` vs

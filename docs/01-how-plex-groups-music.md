@@ -78,6 +78,55 @@ Two distinct kinds of stickiness, with different repairs:
    Count the artist's total tracks before and after (e.g. 196 → 196). A
    same-volume move copies nothing, so nothing can be lost — count anyway.
 
+## A fifth failure: `album_artist` decides WHICH ARTIST owns the folder
+
+The four signals above decide how tracks group into an album once you're
+under the right artist. A separate field — `album_artist` — decides which
+artist bucket the whole folder lands in, and it fails in its own
+recognizable way.
+
+**A compilation shatters into one album per performer when `album_artist`
+is set to the track's performer instead of the album's credited artist.**
+A multi-track hits compilation credited to one headline act, with a few
+tracks' `album_artist` left as *that track's own performer* (a feature
+artist, a guest spot), doesn't render as one messy album — it renders as
+**several separate albums**, one per artist named in `album_artist`, all
+sharing the same title and year. The smallest fragment (a single guest
+track) shows up as a whole "mystery album" under an artist who otherwise has
+nothing in the library.
+
+The fix: on a compilation, soundtrack, tribute, or split release,
+`album_artist` must be **uniform across every track** — the album's
+credited artist (or `Various Artists` for a true various-artists release) —
+while the per-track `artist` field still carries each song's real performer.
+This is the wrong-*value* cousin of an empty `album_artist`: there the field
+is blank, here it's set, just to the wrong thing.
+
+**Fixing the tag alone does nothing.** Plex already built the separate album
+objects and won't re-derive the grouping from a corrected tag — see "Built
+albums are sticky" above. Rebuild with `unmatch` + refresh, or the
+move-out → Empty Trash → move-back sequence, exactly as for any other sticky
+grouping defect. (PLAYBOOK L29)
+
+## Two masters, one tile: CD vs vinyl
+
+Keeping two distinct masters of the same album (say, a CD remaster and a
+vinyl rip) as separate releases on disk is a disposition choice made
+upstream of Plex ([chapter 3](03-duplicates-and-quality.md)) — but Plex
+renders the consequence in a way worth knowing about. The two releases'
+`date` values are what let Plex tell them apart at all; make them differ
+(even just in precision), or Plex draws **one identical "title / year"
+tile** for both, indistinguishable to a human browsing the library.
+
+Mark the source in **both** places: the album-title tag (e.g.
+`Album Name [CD]` / `Album Name [24-192 Vinyl]`) and the folder name — the
+tag alone isn't enough, because **Plex does not re-read a folder's title tag
+on a plain rescan unless the folder path itself changed.** Rename the folder
+(or force a per-album metadata refresh) to make a tag correction visible.
+
+Which copy your collection manager actually tracks is a separate question —
+see [chapter 5](05-lidarr.md#cd-vs-vinyl-the-manager-tracks-only-one-copy).
+
 ## The repair ladder
 
 Cheapest first. Escalate only when the level below is proven insufficient.

@@ -1,12 +1,13 @@
 # Tools
 
-Four standalone Python scripts. Requirements: Python 3.8+, `mutagen`
-(`pip install mutagen`), and `ffmpeg` on PATH (fingerprinting only — it uses
-the Chromaprint muxer already built into ffmpeg, so there is no separate
-fpcalc/acoustid dependency).
+Six standalone Python scripts. Requirements: Python 3.8+, `mutagen`
+(`pip install mutagen`), and `ffmpeg` on PATH (used for fingerprinting via
+its built-in Chromaprint muxer — no separate fpcalc/acoustid dependency —
+and for the split/transcode tools' actual audio work).
 
-Everything is read-only except where explicitly noted. Nothing here moves,
-retags, or deletes music.
+Everything is read-only except `cue_split.py` and `to_flac.py`, which write
+new files but never touch a source file — both are dry-run by default and
+only write under `--apply`.
 
 ## `fingerprint.py` — is this the same recording?
 
@@ -84,3 +85,29 @@ listed, files whose header carries no PCM checksum.
 
 Read-only. `--decode` shells out to ffmpeg with a per-file timeout and closed
 stdin, for the reasons in PLAYBOOK L50 and L60.
+
+## `cue_split.py` — split a single-file album image into per-track FLACs
+
+    python cue_split.py --folder "path/to/rip"                 # dry run, auto-picks the cue
+    python cue_split.py --cue "Side A.cue" --apply --verify
+
+For the "one file per vinyl side + a `.cue`" shape. Cuts at sample-accurate
+boundaries derived from the cue's `INDEX MM:SS:FF` frames, re-encodes to
+FLAC, and (`--verify`) proves the split bit-perfect by comparing decoded-PCM
+MD5s of the concatenated output against the original. Writes only under
+`<cue dir>/split` (or `--outdir`); the source is never modified. Full method
+and the two silent-no-op traps it guards against:
+[chapter 3](../docs/03-duplicates-and-quality.md) and PLAYBOOK L30.
+
+## `to_flac.py` — down-convert hi-res/lossless-container rips to a sane ceiling
+
+    python to_flac.py --folder "path/to/rip"            # dry run
+    python to_flac.py --folder "path/to/rip" --apply    # writes <folder>/flac/
+
+Transcodes WavPack/WAV/APE/AIFF sources to FLAC, capping at 96 kHz / 24-bit
+(never inflating a 16-bit source). The discarded band above that ceiling is
+noise for an analog-sourced rip, not music — see
+[chapter 3](../docs/03-duplicates-and-quality.md) and DECISIONS D13. Every
+output is verified for rate/depth/duration before being counted as done.
+Also useful as a pre-step for `cue_split.py`, which reads FLAC/WAV/APE/
+WavPack sources by name.

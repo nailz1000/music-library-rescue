@@ -86,6 +86,42 @@ Fixes, in the order that actually mattered:
    (Check journal mode first — the DB header at bytes 18–19 reads `2 2` when
    WAL is already on, which it likely is.)
 
+## CD vs vinyl: the manager tracks only one copy
+
+When two distinct masters of an album are kept as separate releases on disk
+([chapter 3](03-duplicates-and-quality.md)), the manager still models one
+file per track, so it can only track **one** of them. Point it at the
+higher-resolution copy; the other master stays a deliberately untracked
+release, not a gap to go fill. Mark the source in both the folder name and
+the album-title tag so a human browsing either the files or the manager's
+UI can tell them apart — see
+[chapter 1](01-how-plex-groups-music.md#two-masters-one-tile-cd-vs-vinyl)
+for how this looks on the media-server side. (DECISIONS D12)
+
+**Revisit if** your collection manager ever gains native support for
+tracking multiple releases of one album — then track both, not only the
+better one.
+
+## Reconcile before importing — read first, then write
+
+Before importing a freshly converted or freshly downloaded rip, check
+whether the library already holds it — equal or better. "Import this" is a
+CREATE; do the READ first:
+
+1. Compare the candidate against the library's existing copy of the same
+   album, track by track, using the disposition rules from
+   [chapter 3](03-duplicates-and-quality.md#disposition-rules) (add if
+   missing / replace if better / discard if equal-or-worse / never lose a
+   track the library already has).
+2. If the library's copy looks incomplete or "partly matched," don't assume
+   a gap first. A partly-matched existing album is usually the manager
+   showing **orphaned** files it lost track of on disk, not files that are
+   actually missing — a re-link (Manual Import against the existing files)
+   fixes that. Importing a second copy on top of it doesn't fix the orphan
+   problem, and can overwrite an equal-or-better file with a worse one.
+
+(PLAYBOOK L31)
+
 ## The anonymous-volume trap (Docker)
 
 If Lidarr's `/config` is an **anonymous Docker volume** rather than a bind

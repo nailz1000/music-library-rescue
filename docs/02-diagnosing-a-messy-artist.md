@@ -91,6 +91,18 @@ assembled it. Renumbering the box 1–4 and rebuilding split them instantly.
 Corollary: when no lever separates two folders, stop pulling levers and go read
 the tags Plex is grouping on — something in them genuinely says "same release".
 
+## When "several artists" is really one compilation, shattered
+
+A compilation, soundtrack, or tribute album can present as a diagnosis
+problem at the wrong layer entirely: instead of one messy artist, you see
+**several otherwise-unrelated artists**, each holding a one- or two-track
+"album" with the identical title and year. That's not several artists
+sharing a coincidence — it's one folder whose `album_artist` tag varies
+per track instead of naming the album's credited artist. The tell is the
+duplicated title/year across artists who otherwise share nothing in the
+library. [Chapter 1](01-how-plex-groups-music.md#a-fifth-failure-album_artist-decides-which-artist-owns-the-folder)
+has the full mechanism and the fix (PLAYBOOK L29).
+
 ## Things that look stacked and are not
 
 - **Box sets.** A 70-file folder with `CD 01–04` has the exact shape of the
