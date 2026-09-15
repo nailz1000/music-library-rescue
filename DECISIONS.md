@@ -19,6 +19,13 @@ The format, which is most of the value:
 These are the decisions from the source rescue, generalized. Adopt the ones
 that fit; the register format is the part meant to be copied.
 
+**The one-way link to the source rescue is on purpose.** The private project
+this register generalizes from links to the matching entry here — a private
+register can safely point at a public one. This file does not link back; see
+D15 for why: a pointer into a private repo would dangle for a stranger
+reading this file who cannot open it, so the missing return link is
+deliberate, not rot.
+
 **Scoping discipline:**
 Scope each entry NARROWLY — the ONE thing decided and its tradeoff, not a vague "we simplified X" —
 so it can't be stretched to dismiss an adjacent request. A decision is NOT a shield; don't cite one
@@ -289,7 +296,7 @@ decided by the owner, one at a time, and each went a different way:
 **Revisit if:** singles start arriving for leads deliberately not collected —
 that would argue for creating the lead artist folder rather than requiring it.
 
-### D17 — Placeholder tags are worse than empty ones, and need their own tool
+### D17 — Placeholder tags are worse than empty ones, and need their own tool (2026-08-09)
 A retagger built to fill EMPTY fields explicitly refuses to overwrite a field
 that has a value — the right rule, and exactly why this class slips past it. A
 CD ripper that cannot reach a metadata service does not leave the fields
@@ -317,7 +324,7 @@ tracklist and were left for a lookup rather than typed from memory.
 **Revisit if:** a ripper is found writing a placeholder vocabulary not in the
 list. Add it there rather than in a one-off script.
 
-### D18 — Identify by four methods before discarding anything
+### D18 — Identify by four methods before discarding anything (2026-08-12)
 
 **Decision:** a stray or apparently-redundant file is only a deletion candidate
 after ALL FOUR of these come back empty:
