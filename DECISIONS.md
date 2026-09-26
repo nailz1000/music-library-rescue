@@ -19,6 +19,11 @@ The format, which is most of the value:
 These are the decisions from the source rescue, generalized. Adopt the ones
 that fit; the register format is the part meant to be copied.
 
+**No interface guidelines, on purpose.** This repo is a guide, a playbook and
+command-line tools. It builds no user interface, so there are no interface
+rules to write down. **Revisit if** it ever ships one (a web page, a
+dashboard).
+
 **The one-way link to the source rescue is on purpose.** The private project
 this register generalizes from links to the matching entry here — a private
 register can safely point at a public one. This file does not link back; see
