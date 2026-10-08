@@ -1,0 +1,9 @@
+# Keep gitleaks' default rules enabled. Add allowlist entries here only for exact values,
+# never by path or rule id, so real secrets in the same file remain detectable.
+# Add one comment line per entry explaining why the value is safe.
+# Example (uncomment both lines; anchor the value and escape regex metacharacters):
+#   [allowlist]
+#   regexes = ['''^EXACT_NON_SECRET_VALUE$''']
+
+[extend]
+useDefault = true
