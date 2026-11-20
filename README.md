@@ -155,7 +155,7 @@ bugs, and no decision silently hardens into dogma.
 |---|---|
 | [D1](DECISIONS.md#d1--on-disk-naming-follows-the-file-tags-not-the-managers-metadata-source-2026-07-24) | On-disk naming follows the FILE TAGS, not the manager's metadata source (2026-07-24) |
 | [D2](DECISIONS.md#d2--unknown-album-clutter-is-fixed-by-writing-tags-never-by-deleting-2026-07-24) | "Unknown Album" clutter is fixed by WRITING tags, never by deleting (2026-07-24) |
-| [D3](DECISIONS.md#d3--cleanup-trash-is-reversible-native-recycle-bin-or-a-quarantine-folder-2026-07-24) | Cleanup "trash" is reversible: native recycle bin, or a quarantine folder (2026-07-24) |
+| [D3](DECISIONS.md#d3--cleanup-trash-is-reversible-the-stores-native-recycle-bin-never-a-hard-delete-2026-07-24) | Cleanup "trash" is reversible: the store's native recycle bin, never a hard delete (2026-07-24) |
 | [D4](DECISIONS.md#d4--same-recording-is-decided-by-sound-not-filename-tags-or-bytes-2026-07-24) | "Same recording?" is decided by SOUND, not filename, tags, or bytes (2026-07-24) |
 | [D5](DECISIONS.md#d5--official-release-data-comes-from-whats-already-running-before-any-new-tool-2026-07-24) | Official release data comes from what's ALREADY RUNNING before any new tool (2026-07-24) |
 | [D6](DECISIONS.md#d6--the-restrictive-metadata-profile-is-the-default-permissive-is-opt-in-per-artist-2026-07-24) | The restrictive metadata profile is the DEFAULT; permissive is opt-in per artist (2026-07-24) |

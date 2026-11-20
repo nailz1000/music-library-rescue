@@ -66,12 +66,17 @@ server refiles them. Only items verified uncatalogued get trashed.
 **Revisit if:** an entry is *verified* junk — then it's a recycle-bin move,
 still never a blanket delete of everything that merely looks one-track.
 
-### D3 — Cleanup "trash" is reversible: native recycle bin, or a quarantine folder (2026-07-24)
+### D3 — Cleanup "trash" is reversible: the store's native recycle bin, never a hard delete (2026-07-24)
 Disposition rules (uncatalogued → trash, duplicate → keep higher quality,
 verified demo → `Demo/`, live bootleg → `Live Bootleg/`) decide WHAT goes;
 reversibility decides HOW. "Trash" always means a move to the store's native
 recycle bin ([playbook L6](PLAYBOOK.md)), never an immediate hard delete — bulk judgment
 calls about obscure tracks are exactly the decisions that get revisited.
+
+**Exception, dated:** cleanup runs from before 2026-07-23, when the L6 rule was
+adopted, moved their discards into ad-hoc quarantine folders. Those folders stay reversible as they are until
+emptied; no run since then creates one. A store with no native recycle bin is
+the only case where a new run may use a named quarantine folder instead.
 
 **Revisit if:** the owner asks for immediate hard deletion of a specific,
 provably-worthless set — the reversible default is a safety net, not a mandate.
